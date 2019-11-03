@@ -1,0 +1,12 @@
+Package: spatialSim
+Type: Package
+Title: spatialSim
+Version: 0.0 beta 
+Date: 2019-11-02
+Author: Chris Nottingham
+Maintainer: <c.nottingham@auckland.ac.nz>
+Description: Spatial size structured operating model
+License: What license is it under?
+Depends: TMB, RcppEigen, INLA, Matrix, sp, geosphere
+LinkingTo: TMB, RcppEigen, INLA, Matrix, sp, geosphere
+RoxygenNote: 6.1.1
