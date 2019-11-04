@@ -1,7 +1,7 @@
 Package: spatialSim
 Type: Package
 Title: spatialSim
-Version: 0.0 beta 
+Version: 0.1
 Date: 2019-11-02
 Author: Chris Nottingham
 Maintainer: <c.nottingham@auckland.ac.nz>
