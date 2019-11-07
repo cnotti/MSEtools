@@ -525,11 +525,11 @@ Type objective_function<Type>::operator() () {
         }
 
         // select nsize ref closest to catch limit
-        (cumsum(catch_n) - limitp_c(c)).abs().minCoeff(&nsites);
-        ++nsites;
+        (cumsum(catch_n) - limitp_c(c)).abs().minCoeff(&nsamps);
+        ++nsamps;
         
         // save vector of catch and book-keeping vars
-        niNew = ni + nsites;
+        niNew = ni + nsamps;
         // resize containers
         ncatch_il.conservativeResize(niNew,nl);
         catch_i.conservativeResize(niNew);
@@ -537,14 +537,14 @@ Type objective_function<Type>::operator() () {
         c_i.conservativeResize(niNew);
         t_i.conservativeResize(niNew);
         // fill re-sized areas with sampled data
-        ncatch_il.bottomRows(nsites) = mat_indexing(N_fl, f_n.head(nsites), cols_l);
-        catch_i.tail(nsites) = catch_n.head(nsites);
-        f_i.tail(nsites) = f_n.head(nsites);
+        ncatch_il.bottomRows(nsamps) = mat_indexing(N_fl, f_n.head(nsamps), cols_l);
+        catch_i.tail(nsamps) = catch_n.head(nsamps);
+        f_i.tail(nsamps) = f_n.head(nsamps);
         std::fill(c_i.data() + ni, c_i.data() + niNew, c);
         std::fill(t_i.data() + ni, t_i.data() + niNew, t);
 
         // map catch back to triangulation nodes
-        proj_1s = mat_indexing(Ad_fs, f_n.head(nsites), cols_s).colwise().sum();
+        proj_1s = mat_indexing(Ad_fs, f_n.head(nsamps), cols_s).colwise().sum();
         for (int s=0; s<ns; ++s) {
           for (int l=0; l<nl; ++l) {
             ncatch_cstl(c,s,t,l) = N_ct_sl(c,t)(s,l) * proj_1s(s);
