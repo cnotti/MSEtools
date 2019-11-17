@@ -84,6 +84,20 @@ struct IMATRIXlist_t : vector< matrix<int> > {
 };
 
 
+// data-struct: list of integer matrices 
+template<class Type>
+struct DMATRIXlist_t : vector< matrix<double> > {
+  DMATRIXlist_t(SEXP x){  /* x = List passed from R */
+    (*this).resize(LENGTH(x));
+    for(int i=0; i<LENGTH(x); i++){
+      SEXP sm = VECTOR_ELT(x, i);
+      if(!Rf_isMatrix(sm)) Rf_error("Not a matrix");
+      (*this)(i) = asMatrix<double>(sm);
+    }
+  }
+};
+
+
 // cumulative summation function
 vector<double> cumsum(vector<double> x) {
   int n = x.size();
@@ -119,9 +133,36 @@ vector<int> sample(vector<int> x, int size, vector<double> prob) {
   vector<double> rnd = rexp(one_n) / prob;
   vector<int> vx(n);
   // set indices and sample
-  for(int i=0; i<vx.size(); ++i) vx[i] = i;
+  for(int i=0; i<n; ++i) vx[i] = i;
   std::partial_sort(vx.data(), vx.data() + size, vx.data() + vx.size(), Comp(rnd));
   return vx.segment(0, size).unaryExpr(x);
+}
+
+
+// remove elements in x that match elments in y
+vector<int> drop_y_from_x(vector<int> x, vector<int> y) {
+  int nx = x.size();
+  int ny = y.size();
+  const int negInf = -std::numeric_limits<int>::max();
+  
+  vector<int> indexes(ny);
+  
+  for (int i=0; i<ny; i++) {
+    auto it = std::find(x.data(), x.data() + nx, y(i));
+    indexes(i) = std::distance(x.data(), it);
+    x(indexes(i)) = negInf;
+  }
+  std::partial_sort(x.data(), 
+                    x.data() + ny, 
+                    x.data() + nx);
+  return x.tail(nx - ny);
+}
+
+
+// function equiv. to the R function which(x == y)
+int which_x_equal_y(vector<int> x, int y) {
+  auto it = std::find(x.data(), x.data() + x.size(), y);
+  return std::distance(x.data(), it);
 }
 
 
@@ -153,10 +194,10 @@ Type objective_function<Type>::operator() () {
   DATA_INTEGER(nfishp);             // number of periods in fishing season
   DATA_STRUCT(f_c_fstar, IVECTORlist_t);  // species specific harvest locations f 
   DATA_STRUCT(s_cs_sstar, IVECTORlist_t);  // nodes within spawning range to calculate SSB_s 
-
+  DATA_STRUCT(f_ct_fsurv, IVECTORlist_t); // species specific survey locations f at relevant time points 
+  
   // growth
-  DATA_DMATRIX(delta_cl);  
-  DATA_DVECTOR(sigmaG_c);
+  DATA_STRUCT(G_c_ll, DMATRIXlist_t);
   
   // natural mortality
   DATA_DARRAY(M_csbl);
@@ -172,7 +213,7 @@ Type objective_function<Type>::operator() () {
   DATA_DSCALAR(ptarget);             // site sampling probability given B_i > x 
   DATA_DSCALAR(F_intensity);         // proportion of an area that will be fished at time t
   DATA_IVECTOR(F_settings);          // set whether muF is defined by mean or median 
-  
+        
   // recruitment
   DATA_DVECTOR(R0_c);
   DATA_DVECTOR(h_c);
@@ -184,7 +225,7 @@ Type objective_function<Type>::operator() () {
   DATA_DARRAY(E_cst);                // RF on recruitment
   
   // population size structure
-  DATA_DVECTOR(omega_c);
+  //DATA_DVECTOR(omega_c);
   DATA_DMATRIX(lmid_cl);
   DATA_DMATRIX(weight_cl);
   
@@ -231,10 +272,6 @@ Type objective_function<Type>::operator() () {
   //------------------------//
   // initialization section //
   //------------------------//
-  
-  // growth model variables
-  vector< matrix<double> > G_c_ll(nc);
-  matrix<double> G_ll(nl,nl); G_ll.setZero();
   
   // numbers at-length
   array< matrix<double> > N_csb_l(V_csb, d_csb);
@@ -283,47 +320,13 @@ Type objective_function<Type>::operator() () {
   matrix<double> scale_cl(nc,nl);
   vector<double> limitp_c = limit_c/nfishp;
   
+  vector<int> ftarg;
+  vector<int> fsurv;
+  int ntarg;
+  int nsurv;
+  int fone;
+  int ct = 0;
   
-  //--------------------------//
-  // growth transition matrix //
-  //--------------------------//
-  for (int c=0; c<nc; c++) {
-    G_c_ll(c) = G_ll;
-    for (int k=0; k<nl; k++) {
-      // expected annual growth increment given initial size r
-      //delta_cl(c,k) = vonBert(lmid_cl(c,k), linf_c(c), beta_c(c)/np);
-      // prob growing to each size class c
-      for (int j=0; j<nl; j++) {
-        if (k <= j) {
-          if((j-k)*omega_c(c) == 0) {
-            G_c_ll(c)(j,k) = plnu(omega_c(c),
-                                  log(delta_cl(c,k)) - pow(sigmaG_c(c),2)/2,
-                                  sigmaG_c(c),
-                                  omega_c(c));
-          } else{
-            G_c_ll(c)(j,k) = plnu(omega_c(c)+(j-k)*omega_c(c),
-                                  log(delta_cl(c,k)) - pow(sigmaG_c(c),2)/2,
-                                  sigmaG_c(c),
-                                  omega_c(c)) - 
-                             plnu((j-k)*omega_c(c),
-                                  log(delta_cl(c,k)) - pow(sigmaG_c(c),2)/2,
-                                  sigmaG_c(c),
-                                  omega_c(c));
-          }
-        }
-        // set neg growth to 0
-        if (k > j) {
-          G_c_ll(c)(j,k) = 0;
-        }
-        // correct negative values resulting from numerical instability
-        if (G_c_ll(c)(j,k) != 0 & abs(G_c_ll(c)(j,k)) < 1e-10) {
-          G_c_ll(c)(j,k) = 0;
-        }
-      }
-      G_c_ll(c).col(k) = G_c_ll(c).col(k)/G_c_ll(c).col(k).sum();
-    }
-  }
-
   
   //--------------------------------------------------//
   // calculate variables to be used in state dynamics //
@@ -469,7 +472,26 @@ Type objective_function<Type>::operator() () {
 
       // <><><><><><><><> begin harvest <><><><><><><><>
       if (t_catch(t) == 0) {
-      
+
+        if (f_ct_fsurv(ct)(0) >= 0) {
+          // remove survey sites from commercial domain
+          nsurv = f_ct_fsurv(ct).size();
+          fsurv.resize(nsurv);
+          fsurv = f_ct_fsurv(ct);
+          ntarg = nfstar_c(c) - nsurv;
+          ftarg.resize(ntarg);
+          ftarg = drop_y_from_x(f_c_fstar(c), fsurv);
+          ct++;
+        } else {
+          // no surveys
+          ntarg = nfstar_c(c);
+          ftarg.resize(ntarg);
+          ftarg = f_c_fstar(c);
+        }
+        
+        // set fone as closest target site to ffirst_c which(targ ~= ffirst_c) 
+        (ftarg - ffirst_c(c)).abs().minCoeff(&fone);
+        
         // abundance at each grid cell
         N_fl = A_fs * N_ct_sl(c,t);
         B_f = A_fs * B_ct_s(c,t);
@@ -481,28 +503,22 @@ Type objective_function<Type>::operator() () {
           muBf = median(B_f);
         }
         
-        nsamps = std::min(ceil(limitp_c(c) / muBf), floor(nfstar_c(c) * 0.9));
-        nsites = ceil(nsamps / F_intensity);
+        nsamps = std::min(ceil(limitp_c(c) / muBf), ceil(ntarg * 0.9));
+        nsites = std::min(ceil(nsamps / F_intensity), ceil(ntarg));
         
-        if (nsites >= nfstar_c(c)) {
-          // the case where there are not enough fish to catch
-          nsites = nfstar_c(c);
-          f_sample.resize(nsites);
-          f_sample = f_c_fstar(c);
-          ffirst_c(c) = 0;
-        } else if (nsites > nfstar_c(c) - ffirst_c(c)) {
-          // the case where fishing must restart at location 1
-          nsites1 = nfstar_c(c) - ffirst_c(c);
-          nsites2 = nsites - nsites1;
-          f_sample.resize(nsites);
-          f_sample.tail(nsites1) = f_c_fstar(c).segment(ffirst_c(c), nsites1);
-          f_sample.head(nsites2) = f_c_fstar(c).segment(0, nsites2);
-          ffirst_c(c) = nsites2;
-        } else {
+        if (nsites < ntarg - fone) {
           // the case where fishing can continue without issue
           f_sample.resize(nsites);
-          f_sample = f_c_fstar(c).segment(ffirst_c(c), nsites);
-          ffirst_c(c) += nsites;
+          f_sample = ftarg.segment(fone, nsites);
+          fone += nsites;
+        } else {
+          // the case where fishing must restart part-way through time-step at location 1
+          nsites1 = ntarg - fone;
+          nsites2 = nsites - nsites1;
+          f_sample.resize(nsites);
+          f_sample.tail(nsites1) = ftarg.segment(fone, nsites1);
+          f_sample.head(nsites2) = ftarg.segment(0, nsites2);
+          fone = nsites2;
         }
         
         prob_f.resize(nsites);
@@ -552,6 +568,7 @@ Type objective_function<Type>::operator() () {
         }
 
         // update variables for harvest in next time period
+        ffirst_c(c) = ftarg(fone);
         ni = niNew;
         catch_n.setZero();
       }

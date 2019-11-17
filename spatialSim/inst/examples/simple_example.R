@@ -57,9 +57,21 @@ for (c in 1:nc) {
                            depth_f > dbounds_c2[c,2]) - 1
 }
 
+# set sampling sites 
+f_ct_fsurv = as.vector(rep(-1, nc*ny*np), "list")
+ct = 1
+p = 1
+for(c in 1:nc) {
+  for(t in 1:(ny*np)){
+    if (p == 1) {
+      f_ct_fsurv[[ct]] = sample(f_c_fstar[[c]], 50, replace = FALSE)
+    }
+    p = ifelse(p < np, p + 1, 1)
+    ct = ct + 1
+  }
+}
 
 # define growth, selectivity & maturity functions
-
 linf_c = c(mean(c(60.8, 60.3, 57.6, 52.1, 54.6)),
            mean(c(75.2, 88, 80.6, 72.3, 72.4)))
 beta_c = c(mean(c(0.48, 1.01, 1.74, 0.8, 1.44)),
@@ -143,6 +155,7 @@ data_om = setup_om(
   F_intensity = 0.2,
   F_settings = 0,
   f_c_fstar = f_c_fstar,
+  f_ct_fsurv = f_ct_fsurv,
   
   # recruitment
   fn_mature = fn_mature,

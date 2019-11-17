@@ -37,6 +37,7 @@ setup_om = function(
   ffirst_c = rep(0, nc),
   F_settings = 0,
   f_c_fstar,
+  f_ct_fsurv,
   
   # recruitment
   fn_mature,
@@ -69,6 +70,60 @@ setup_om = function(
   ) {
     set.seed(seed)
 
+    # functions
+    fn_G = function(delta_cl, omega_c, sigmaG_c) {
+      pow = function(x, p) {
+        x^p
+      }
+      plnu = function(y, nu, tau, omega){
+        H = function(y, nu, tau, omega){
+          (y*plnorm(y, nu, tau) -
+             exp(nu + 0.5*tau^2) *
+             pnorm(log(y), nu + tau^2, tau))/omega
+        }
+        H(y, nu, tau, omega) - H(pmax(y - omega, 0), nu, tau, omega)
+      }
+      
+      nl = ncol(delta_cl)
+      nc = nrow(delta_cl)
+      G_c_ll = as.vector(rep(list(matrix(0, nrow = nl, ncol = nl)), nc), "list")
+      for (c in 1:nc) {
+        for (k in 1:nl) {
+          # prob growing from size class k to j
+          for (j in 1:nl) {
+            if (k <= j) {
+              if((j-k)*omega_c[c] == 0) {
+                G_c_ll[[c]][j,k] = plnu(omega_c[c],
+                                      log(delta_cl[c,k]) - pow(sigmaG_c[c],2)/2,
+                                      sigmaG_c[c],
+                                      omega_c[c]);
+              } else{
+                pr_b = plnu(omega_c[c] + (j-k)*omega_c[c],
+                            log(delta_cl[c,k]) - pow(sigmaG_c[c],2)/2,
+                            sigmaG_c[c],
+                            omega_c[c])
+                pr_a = plnu((j - k) * omega_c[c],
+                            log(delta_cl[c,k]) - pow(sigmaG_c[c],2)/2,
+                            sigmaG_c[c],
+                            omega_c[c]);
+                G_c_ll[[c]][j,k] = ifelse(isTRUE(all.equal(pr_b, pr_a)), 0, pr_b - pr_a)
+              }
+            }
+            # set neg growth probs to 0
+            if (k > j) {
+              G_c_ll[[c]][j,k] = 0;
+            }
+            if (G_c_ll[[c]][j,k] < 0) {
+              warning("elemant(s) of G < 0: check growth parameters");
+            }
+          }
+          G_c_ll[[c]][,k] = G_c_ll[[c]][,k]/sum(G_c_ll[[c]][,k]);
+        }
+      }
+      G_c_ll
+    }
+      
+  
     # options (at this stage these are fixed)
     g_I = "logit"
     g_E = "logit"
@@ -110,6 +165,7 @@ setup_om = function(
     weight_cl = fn_weight(lmid_cl)
     selectivityF_cl = fn_select(lmid_cl)
     pmat_cl = fn_mature(lmid_cl)
+    G_c_ll = fn_G(delta_cl, omega_c, sigmaG_c)
     
     # recruitment
     npsi = 1
@@ -206,6 +262,7 @@ setup_om = function(
       # growth 
       delta_cl = delta_cl,
       sigmaG_c = sigmaG_c,
+      G_c_ll = G_c_ll,
       
       # natural mortality
       alpha_c = alpha_c, 
@@ -233,6 +290,7 @@ setup_om = function(
       ffirst_c = ffirst_c,
       F_settings = F_settings,
       f_c_fstar = f_c_fstar,
+      f_ct_fsurv = f_ct_fsurv,
       
       # recruitment
       R0_c = R0_c,
