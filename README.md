@@ -1,2 +1,2 @@
 # MSEtools
-Tools for carrying out a Management Strategy Evaluation with spatial dynamics.
+Tools for carrying out a spatial Management Strategy Evaluation.
