@@ -302,6 +302,9 @@ Type objective_function<Type>::operator() () {
   vector< matrix<double> > selectivityF_c_l(nc);      // fishing selectivity
   vector< matrix<double> > selectivityF_c_1l(nc);     // fishing selectivity
   
+  // area of each node
+  double areas = areaOmegastar / ns;
+  
   // variables used in harvest
   matrix<double> Ad_fs = matrix<double>(A_fs);        // dense proj matrix
   matrix<double> proj_1s(1,ns);
@@ -339,7 +342,7 @@ Type objective_function<Type>::operator() () {
     pmat_c_l(c) = pmat_cl.row(c).transpose();
     selectivityF_c_l(c) = selectivityF_cl.row(c).transpose();
     selectivityF_c_1l(c) = selectivityF_cl.row(c);
-    scale_cl.row(c) = selectivityF_c_1l(c)/(areaOmegastar/ns)*areadredge;
+    scale_cl.row(c) = selectivityF_c_1l(c) / areas * areadredge;
     maxpsis_c(c) = psi_cs.row(c).maxCoeff();
   }
   
@@ -366,7 +369,7 @@ Type objective_function<Type>::operator() () {
           // during first half of initialization calculate SSB0_c
           else if (b < 2*nb/3) {
             // here, recruitment is based off SR = 1 
-            R_l = R0_c(c) / ns * E_csb(c,s,b-1) * psi_p(p) * psi_cs(c,s) * psi_l;
+            R_l = R0_c(c) * areas * E_csb(c,s,b-1) * psi_p(p) * psi_cs(c,s) * psi_l;
             // natural mortality
             for (int l=0; l<nl; l++) {
               S_l(l) = exp(-M_csbl(c,s,b-1,l));
@@ -387,7 +390,7 @@ Type objective_function<Type>::operator() () {
               bswitch_c(c) = 1;
               SSB0_c(c) /= n0_c(c);
             }
-            calc_recruit(R_l, R0_c(c) / ns, SSB0_c(c), SSB_cb_s(c,b-1), s_cs_sstar(cs),
+            calc_recruit(R_l, R0_c(c) * areas, SSB0_c(c), SSB_cb_s(c,b-1), s_cs_sstar(cs),
                          h_c(c), E_csb(c,s,b-1), psi_l, psi_p(p), psi_cs(c,s));      
             // natural mortality
             for (int l=0; l<nl; l++) {
@@ -436,7 +439,7 @@ Type objective_function<Type>::operator() () {
           for (int l=0; l<nl; l++) {
             S_l(l) = exp(-M_csbl(c,s,nb-1,l));
           }
-          calc_recruit(R_l, R0_c(c) / ns, SSB0_c(c), SSB_cb_s(c,nb-1), s_cs_sstar(cs),
+          calc_recruit(R_l, R0_c(c) * areas, SSB0_c(c), SSB_cb_s(c,nb-1), s_cs_sstar(cs),
                        h_c(c), E_csb(c,s,nb-1), psi_l, psi_p(p_t(t)), psi_cs(c,s));          
           N_cst_l(c,s,t) = G_c_ll(c) * ( (N_csb_l(c,s,nb-1) + R_l).cwiseProduct(S_l) );
         }
@@ -459,13 +462,13 @@ Type objective_function<Type>::operator() () {
           calc_biomass(B_cst(c,s,t-1), SSB_ct_s(c,t-1)(s), B_ct(c,t-1), SSB_ct(c,t-1), 
                        N_cst_l(c,s,t-1), selectivityF_c_l(c), pmat_c_l(c), weight_c_1l(c));
           // numbers at beginning of time t subject to fishing, growth, and natural mortality
-          calc_recruit(R_cst_l(c,s,t-1), R0_c(c) / ns, SSB0_c(c), SSB_ct_s(c,t-1), s_cs_sstar(cs),
+          calc_recruit(R_cst_l(c,s,t-1), R0_c(c) * areas, SSB0_c(c), SSB_ct_s(c,t-1), s_cs_sstar(cs),
                        h_c(c), E_cst(c,s,t-1), psi_l, psi_p(p_t(t)), psi_cs(c,s));
           N_cst_l(c,s,t) = G_c_ll(c) * (N_cst_l(c,s,t-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
         }
-        B_ct_s(c,t)(s) = (weight_c_1l(c) * N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c)))(0,0) / (areaOmegastar / ns) * areadredge;
+        B_ct_s(c,t)(s) = (weight_c_1l(c) * N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c)))(0,0) / areas * areadredge;
         // reshape and scale N for projection
-        N_ct_sl(c,t).row(s) = (N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c))).transpose() / (areaOmegastar / ns) * areadredge;
+        N_ct_sl(c,t).row(s) = (N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c))).transpose() / areas * areadredge;
         // iterate cs
         cs += 1;
       }

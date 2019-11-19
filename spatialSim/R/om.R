@@ -1,8 +1,9 @@
 #' @export
-om = function(a = NULL, data_om, seed = 105) {
+om = function(a = NULL, data_om, seed = 105, verbose = TRUE) {
   set.seed(seed)
 
   if (is.null(a) || a == 1) {
+    t1 = Sys.time()
     # simulate species-space-time and species-space-time-size innovations    
     sim = TMB::MakeADFun(data = data_om[!names(data_om) %in% "extra"],
                          parameters = data_om["dummyParameter"], 
@@ -12,6 +13,12 @@ om = function(a = NULL, data_om, seed = 105) {
     data_om["E_cst"] = sim["E_cst"]
     data_om["M_csbl"] = sim["M_csbl"]
     data_om["M_cstl"] = sim["M_cstl"]
+    run_time = Sys.time() - t1
+    if (verbose == TRUE) {
+      cat(paste("simulation of random processes completed in", 
+                round(run_time, 3), attr(run_time, "units"),
+                "\n"))
+    }
   }
   
   if (!is.null(a)) {
@@ -25,9 +32,11 @@ om = function(a = NULL, data_om, seed = 105) {
                       type = "Fun", DLL = "OM")
   om_rep = om$report(unlist(data_om["dummyParameter"]))
   run_time = Sys.time() - t1
-  cat(paste("harvest completed in", 
-            round(run_time, 3), attr(run_time, "units"),
-            "\n"))
+  if (verbose == TRUE) {
+    cat(paste("harvest completed in", 
+              round(run_time, 3), attr(run_time, "units"),
+              "\n"))
+  }
   
   return(list(data_om = data_om,
               om_rep  = om_rep))
