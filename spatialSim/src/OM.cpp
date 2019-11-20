@@ -143,8 +143,9 @@ vector<int> sample(vector<int> x, int size, vector<double> prob) {
 vector<int> drop_y_from_x(vector<int> x, vector<int> y) {
   int nx = x.size();
   int ny = y.size();
+  int nNew = nx - ny;
+  vector<int> res(nNew);
   const int negInf = -std::numeric_limits<int>::max();
-  
   vector<int> indexes(ny);
   
   for (int i=0; i<ny; i++) {
@@ -155,7 +156,9 @@ vector<int> drop_y_from_x(vector<int> x, vector<int> y) {
   std::partial_sort(x.data(), 
                     x.data() + ny, 
                     x.data() + nx);
-  return x.tail(nx - ny);
+  res = x.tail(nNew);
+  std::sort(res.data(), res.data() + nNew);
+  return res;
 }
 
 
@@ -195,6 +198,7 @@ Type objective_function<Type>::operator() () {
   DATA_STRUCT(f_c_fstar, IVECTORlist_t);  // species specific harvest locations f 
   DATA_STRUCT(s_cs_sstar, IVECTORlist_t);  // nodes within spawning range to calculate SSB_s 
   DATA_STRUCT(f_ct_fsurv, IVECTORlist_t); // species specific survey locations f at relevant time points 
+  DATA_IMATRIX(ct_ct);
   
   // growth
   DATA_STRUCT(G_c_ll, DMATRIXlist_t);
@@ -254,6 +258,7 @@ Type objective_function<Type>::operator() () {
   for (int c=0; c<nc; c++) {
     nfstar_c(c) = f_c_fstar(c).size();
   }
+  
   // variables to initialize and create containers
   vector<int> d_cst(3); d_cst << nc,ns,nt;    // dimension species space time
   vector<int> d_csb(3); d_csb << nc,ns,nb;    // dimension species space time_bip
@@ -328,7 +333,6 @@ Type objective_function<Type>::operator() () {
   int ntarg;
   int nsurv;
   int fone;
-  int ct = 0;
   
   
   //--------------------------------------------------//
@@ -421,7 +425,9 @@ Type objective_function<Type>::operator() () {
     }
   }
   
-  
+  int debug = 0;
+  int DEBUGfone, DEBUGffirst;
+  vector<int> DEBUGftarg;
 
   //----------------------//
   // model state dynamics //
@@ -473,20 +479,22 @@ Type objective_function<Type>::operator() () {
         cs += 1;
       }
 
+      
+      
       // <><><><><><><><> begin harvest <><><><><><><><>
       if (t_catch(t) == 0) {
 
-        if (f_ct_fsurv(ct)(0) >= 0) {
+        if (f_ct_fsurv(ct_ct(c,t))(0) >= 0) {
           // remove survey sites from commercial domain
-          nsurv = f_ct_fsurv(ct).size();
+          nsurv = f_ct_fsurv(ct_ct(c,t)).size();
           fsurv.resize(nsurv);
-          fsurv = f_ct_fsurv(ct);
+          fsurv = f_ct_fsurv(ct_ct(c,t));
           ntarg = nfstar_c(c) - nsurv;
           ftarg.resize(ntarg);
           ftarg = drop_y_from_x(f_c_fstar(c), fsurv);
-          ct++;
         } else {
           // no surveys
+          nsurv = 0;
           ntarg = nfstar_c(c);
           ftarg.resize(ntarg);
           ftarg = f_c_fstar(c);
@@ -494,6 +502,13 @@ Type objective_function<Type>::operator() () {
         
         // set fone as closest target site to ffirst_c which(targ ~= ffirst_c) 
         (ftarg - ffirst_c(c)).abs().minCoeff(&fone);
+        
+        if(debug < 1) {
+          DEBUGfone = fone;
+          DEBUGftarg = ftarg;
+          DEBUGffirst = ffirst_c(c);
+          debug = 2;
+        }
         
         // abundance at each grid cell
         N_fl = A_fs * N_ct_sl(c,t);
@@ -548,7 +563,7 @@ Type objective_function<Type>::operator() () {
         ++nsamps;
         
         // save vector of catch and book-keeping vars
-        niNew = ni + nsamps;
+        niNew = ni + nsamps + nsurv;
         // resize containers
         ncatch_il.conservativeResize(niNew,nl);
         catch_i.conservativeResize(niNew);
@@ -556,6 +571,11 @@ Type objective_function<Type>::operator() () {
         c_i.conservativeResize(niNew);
         t_i.conservativeResize(niNew);
         // fill re-sized areas with sampled data
+        if (nsurv > 0) {
+          catch_i.segment(ni, nsurv) = fsurv.unaryExpr(B_f);
+          ncatch_il.block(ni,0,nsurv,nl) = mat_indexing(N_fl, fsurv, cols_l);
+          f_i.segment(ni, nsurv) = fsurv;
+        }
         ncatch_il.bottomRows(nsamps) = mat_indexing(N_fl, f_n.head(nsamps), cols_l);
         catch_i.tail(nsamps) = catch_n.head(nsamps);
         f_i.tail(nsamps) = f_n.head(nsamps);
@@ -563,7 +583,7 @@ Type objective_function<Type>::operator() () {
         std::fill(t_i.data() + ni, t_i.data() + niNew, t);
 
         // map catch back to triangulation nodes
-        proj_1s = mat_indexing(Ad_fs, f_n.head(nsamps), cols_s).colwise().sum();
+        proj_1s = mat_indexing(Ad_fs, f_i.tail(nsurv + nsamps), cols_s).colwise().sum();
         for (int s=0; s<ns; ++s) {
           for (int l=0; l<nl; ++l) {
             ncatch_cstl(c,s,t,l) = N_ct_sl(c,t)(s,l) * proj_1s(s);
@@ -588,6 +608,10 @@ Type objective_function<Type>::operator() () {
     }
   }
   
+  REPORT(DEBUGfone);
+  REPORT(DEBUGffirst);
+  REPORT(DEBUGftarg);
+
   // harvest data
   REPORT(SSB0_c);
   REPORT(N_csl);

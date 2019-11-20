@@ -231,6 +231,8 @@ setup_om = function(
     }
     
     
+    
+    
     # return list
     list(
       # options
@@ -258,7 +260,8 @@ setup_om = function(
       nfishp = nfishp, 
       fishp1 = fishp1,
       s_cs_sstar = s_cs_sstar,
-            
+      ct_ct = matrix(0:(nc*nt-1), nrow = nc, ncol = nt, byrow = TRUE),
+      
       # growth 
       delta_cl = delta_cl,
       sigmaG_c = sigmaG_c,

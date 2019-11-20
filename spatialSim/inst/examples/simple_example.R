@@ -10,6 +10,7 @@ ny = 5
 np = 12
 nc = 2
 nl = 10
+fishp1 = 11
 
 # define spatial objects
 areadredge = 100
@@ -70,7 +71,7 @@ ct = 1
 p = 1
 for(c in 1:nc) {
   for(t in 1:(ny*np)){
-    if (p == 1) {
+    if (p == fishp1+1) {
       f_ct_fsurv[[ct]] = sample(f_c_fstar[[c]], 50, replace = FALSE)
     }
     p = ifelse(p < np, p + 1, 1)
@@ -90,7 +91,6 @@ fn_growth = function(lmid_cl) {
   }
   delta_cl
 }
-
 fn_mature = function(lmid_cl) {
   l50_c = 0.25 * linf_c
   l95_c = 0.5 * linf_c
@@ -136,7 +136,7 @@ data_om = setup_om(
   nx = 50,
   nl = nl, 
   nfishp = 1, 
-  fishp1 = 11,
+  fishp1 = fishp1,
   
   # growth 
   fn_growth = fn_growth,
