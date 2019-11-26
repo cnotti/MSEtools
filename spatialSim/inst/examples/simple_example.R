@@ -158,15 +158,15 @@ data_om = setup_om(
   fn_select = fn_select,
   limit_c = c(500, 500)*1e3,
   areadredge = areadredge,
-  ptarget = 0.95,
-  F_intensity = 0.85,
+  ptarget = 0.99,
+  F_intensity = 1.5,
   F_settings = 0,
   f_c_fstar = f_c_fstar,
   f_ct_fsurv = f_ct_fsurv,
   
   # recruitment
   fn_mature = fn_mature,
-  R0_c = exp(c(5, 4)),
+  R0_c = exp(c(5.5, 3.5)),
   h_c = c(0.5, 0.5),
   psi_p = c(rep(0, np/2), rep(1/(np/2), np/2)),
   psi_l = matrix(c(1, rep(0, nl - 1)), ncol = 1), 

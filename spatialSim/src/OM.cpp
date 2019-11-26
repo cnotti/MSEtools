@@ -153,12 +153,11 @@ vector<int> drop_y_from_x(vector<int> x, vector<int> y) {
     indexes(i) = std::distance(x.data(), it);
     x(indexes(i)) = negInf;
   }
-  std::partial_sort(x.data(), 
+  /*std::partial_sort(x.data(), 
                     x.data() + ny, 
-                    x.data() + nx);
-  res = x.tail(nNew);
-  std::sort(res.data(), res.data() + nNew);
-  return res;
+                    x.data() + nx);*/
+  std::sort(x.data(), x.data() + nx);
+  return x.tail(nNew);
 }
 
 
@@ -523,6 +522,10 @@ Type objective_function<Type>::operator() () {
         
         nsamps = std::min(ceil(limitp_c(c) / muBf), ceil(ntarg * 0.9));
         nsites = std::min(ceil(nsamps / F_intensity), ceil(ntarg));
+        // if F_intensity > 1 adjust nsamps
+        if (nsamps > nsites) {
+          nsamps = nsites;
+        }
         
         if (nsites < ntarg - fone) {
           // the case where fishing can continue without issue
@@ -548,7 +551,7 @@ Type objective_function<Type>::operator() () {
           }
         }
         
-        while (catch_n.sum() < limitp_c(c) & nsamps < nsites) {
+        while (catch_n.sum() < limitp_c(c) & nsamps <= nsites) {
           // resize containers
           f_n.resize(nsamps);
           catch_n.resize(nsamps);
