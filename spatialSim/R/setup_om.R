@@ -171,8 +171,7 @@ setup_om = function(
     npsi = 1
     psi_l = matrix(c(rep(1/npsi, npsi), rep(0, nl - npsi)), ncol = 1)
     if (missing(Rho_cc)) {
-      Rho_cc = matrix(0, nrow = nc, ncol = nc)
-      diag(Rho_cc) = 1
+      Rho_cc = diag(nc)
     }
     
     # inla object
@@ -316,6 +315,8 @@ setup_om = function(
       lnaniso = lnaniso,
           
       # population size structure
+      lmin_c = lmin_c, 
+      lmax_c = lmax_c,
       omega_c = omega_c,
       lmid_cl = lmid_cl,
       weight_cl = weight_cl,

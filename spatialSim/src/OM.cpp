@@ -302,7 +302,7 @@ Type objective_function<Type>::operator() () {
   
   // survival/mortality  
   matrix<double> S_l(nl,1);
-  array< matrix<double> > SF_cst_l(V_cst, d_cst);     // survival from fishing
+  //array< matrix<double> > SF_cst_l(V_cst, d_cst);     // survival from fishing
   vector< matrix<double> > selectivityF_c_l(nc);      // fishing selectivity
   vector< matrix<double> > selectivityF_c_1l(nc);     // fishing selectivity
   
@@ -424,10 +424,7 @@ Type objective_function<Type>::operator() () {
     }
   }
   
-  int debug = 0;
-  int DEBUGfone, DEBUGffirst;
-  vector<int> DEBUGftarg;
-
+  
   //----------------------//
   // model state dynamics //
   //----------------------//
@@ -448,24 +445,11 @@ Type objective_function<Type>::operator() () {
                        h_c(c), E_csb(c,s,nb-1), psi_l, psi_p(p_t(t)), psi_cs(c,s));          
           N_cst_l(c,s,t) = G_c_ll(c) * ( (N_csb_l(c,s,nb-1) + R_l).cwiseProduct(S_l) );
         }
-        if (t >= 1) {
-          SF_cst_l(c,s,t-1) = m_l;
-          SSB_ct_s(c,t-1) = m_s;
-          // survival rates
+        if (t > 0) {
+          // natural mortality survival rates
           for (int l=0; l<nl; l++) {
-            if (ncatch_cstl(c,s,t-1,l) <= N_cst_l(c,s,t-1)(l)) {
-              SF_cst_l(c,s,t-1)(l) = 1 - ncatch_cstl(c,s,t-1,l) / (N_cst_l(c,s,t-1)(l) + 1e-6);
-            } else {
-              SF_cst_l(c,s,t-1)(l) = 1e-12;
-            }
-            
             S_l(l) = exp(-M_cstl(c,s,t-1,l));
           }
-          // remove catch from t-1
-          N_cst_l(c,s,t-1) = N_cst_l(c,s,t-1).cwiseProduct(SF_cst_l(c,s,t-1));
-          // biomass calculations
-          calc_biomass(B_cst(c,s,t-1), SSB_ct_s(c,t-1)(s), B_ct(c,t-1), SSB_ct(c,t-1), 
-                       N_cst_l(c,s,t-1), selectivityF_c_l(c), pmat_c_l(c), weight_c_1l(c));
           // numbers at beginning of time t subject to fishing, growth, and natural mortality
           calc_recruit(R_cst_l(c,s,t-1), R0_c(c) * areas, SSB0_c(c), SSB_ct_s(c,t-1), s_cs_sstar(cs),
                        h_c(c), E_cst(c,s,t-1), psi_l, psi_p(p_t(t)), psi_cs(c,s));
@@ -501,23 +485,16 @@ Type objective_function<Type>::operator() () {
         
         // set fone as closest target site to ffirst_c which(targ ~= ffirst_c) 
         (ftarg - ffirst_c(c)).abs().minCoeff(&fone);
-        
-        if(debug < 1) {
-          DEBUGfone = fone;
-          DEBUGftarg = ftarg;
-          DEBUGffirst = ffirst_c(c);
-          debug = 2;
-        }
-        
+             
         // abundance at each grid cell
         N_fl = A_fs * N_ct_sl(c,t);
         B_f = A_fs * B_ct_s(c,t);
 
         // calculate site selection probs
         if (F_settings(0) == 0) {
-          muBf = B_f.mean();
+          muBf = ftarg.unaryExpr(B_f).mean();
         } else {
-          muBf = median(B_f);
+          muBf = median(ftarg.unaryExpr(B_f));
         }
         
         nsamps = std::min(ceil(limitp_c(c) / muBf), ceil(ntarg * 0.9));
@@ -585,12 +562,18 @@ Type objective_function<Type>::operator() () {
         std::fill(c_i.data() + ni, c_i.data() + niNew, c);
         std::fill(t_i.data() + ni, t_i.data() + niNew, t);
 
-        // map catch back to triangulation nodes
+        // map catch back to triangulation nodes and remove from population
         proj_1s = mat_indexing(Ad_fs, f_i.tail(nsurv + nsamps), cols_s).colwise().sum();
         for (int s=0; s<ns; ++s) {
           for (int l=0; l<nl; ++l) {
             ncatch_cstl(c,s,t,l) = N_ct_sl(c,t)(s,l) * proj_1s(s);
+            if (ncatch_cstl(c,s,t,l) <= N_cst_l(c,s,t)(l)) {
+              S_l(l) = 1 - ncatch_cstl(c,s,t,l) / (N_cst_l(c,s,t)(l) + 1e-6);
+            } else {
+              S_l(l) = 1e-12;
+            }
           }
+          N_cst_l(c,s,t) = N_cst_l(c,s,t).cwiseProduct(S_l);
         }
 
         // update variables for harvest in next time period
@@ -599,6 +582,13 @@ Type objective_function<Type>::operator() () {
         catch_n.setZero();
       }
       // <><><><><><><><> end harvest <><><><><><><><>
+      
+      // post harvest biomass calculations (used for calculating recruitment)
+      SSB_ct_s(c,t) = m_s;
+      for (int s=0; s<ns; s++) {   
+        calc_biomass(B_cst(c,s,t), SSB_ct_s(c,t)(s), B_ct(c,t), SSB_ct(c,t), 
+                     N_cst_l(c,s,t), selectivityF_c_l(c), pmat_c_l(c), weight_c_1l(c));
+      }
     }
   }
   
@@ -611,11 +601,7 @@ Type objective_function<Type>::operator() () {
     }
   }
   
-  REPORT(DEBUGfone);
-  REPORT(DEBUGffirst);
-  REPORT(DEBUGftarg);
-
-  // harvest data
+   // harvest data
   REPORT(SSB0_c);
   REPORT(N_csl);
   REPORT(B_cst);
@@ -624,6 +610,7 @@ Type objective_function<Type>::operator() () {
   REPORT(f_i);
   REPORT(t_i);
   REPORT(catch_i);
+  REPORT(ncatch_il);
 
   return 0;
 }

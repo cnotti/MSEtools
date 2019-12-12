@@ -1,5 +1,5 @@
 #' @export
-om = function(a = NULL, data_om, seed = 105, verbose = TRUE) {
+om = function(a = NULL, data_om, seed = NULL, verbose = TRUE) {
   set.seed(seed)
 
   if (is.null(a) || a == 1) {
@@ -8,11 +8,19 @@ om = function(a = NULL, data_om, seed = 105, verbose = TRUE) {
     sim = TMB::MakeADFun(data = data_om[!names(data_om) %in% "extra"],
                          parameters = data_om["dummyParameter"], 
                          DLL = "SIM")$simulate()
-    
+    data_om["I_b"] = sim["I_b"]
+    data_om["I_t"] = sim["I_t"]
+    data_om["H_sbl"] = sim["H_sbl"]
+    data_om["H_stl"] = sim["H_stl"]
     data_om["E_csb"] = sim["E_csb"]
     data_om["E_cst"] = sim["E_cst"]
     data_om["M_csbl"] = sim["M_csbl"]
     data_om["M_cstl"] = sim["M_cstl"]
+    allSim = c(data_om[["M_csbl"]], data_om[["M_cstl"]], 
+               data_om[["E_csb"]], data_om[["E_cst"]])
+    if (any(is.na(allSim)) | any(is.null(allSim)) | any(is.infinite(allSim))){
+      stop("simulated random processes are not all real numbers")
+    }
     run_time = Sys.time() - t1
     if (verbose == TRUE) {
       cat(paste("simulation of random processes completed in", 
@@ -39,5 +47,6 @@ om = function(a = NULL, data_om, seed = 105, verbose = TRUE) {
   }
   
   return(list(data_om = data_om,
-              om_rep  = om_rep))
+              om_rep  = om_rep,
+              harvest_time = run_time))
 }

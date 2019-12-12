@@ -139,9 +139,10 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
 plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
                     p, y, leglim = c(min(z_s), max(z_s)),
                     xlim, ylim, np = 12, ncols = 100, pretty = TRUE, 
-                    cex.text = 1, col.text = "black", ...) {
+                    cex.text = 1, col.text = "black",
+                    bg = "dark blue", ...) {
   # plot image
-  cols = colorRampPalette(c("dark blue", 
+  cols = colorRampPalette(c(bg, 
                             "light yellow", "yellow",
                             "red", "maroon"))(ncols)
 
@@ -161,12 +162,12 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
     ylim = c(min(lat), max(lat))
   }
   if (!missing(land)) {
-    plot(land, col = "dark green", bg = "dark blue",
-         xlim = xlim, ylim = ylim)
+    plot(land, col = "dark green", bg = bg,
+         xlim = xlim, ylim = ylim, xpd = FALSE)
     image(lon, lat, zmat,
           col =  cols, breaks = seq(leglim[1], leglim[2], len = ncols + 1),
           add = TRUE)
-    plot(land, col = "dark green", add = TRUE)
+    plot(land, col = "dark green", add = TRUE, xpd = FALSE)
   } else {
     image(lon, lat, zmat, xaxt = "n", yaxt = "n",
           col =  cols, breaks = seq(leglim[1], leglim[2], len = ncols + 1),
@@ -191,7 +192,7 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
                                                  Polygon(outer_coords)),
                                             "Domain")))
   
-  plot(domain_sp, add = TRUE, col = "white", border = "white")
+  #plot(domain_sp, add = TRUE, col = bg, border = bg)
   #box()
   
   # add legend
@@ -262,7 +263,8 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                       np = 12, ncols = 100, pretty = TRUE,
                       species_names = NULL, height = 5,
                       p_width = 0.3, mar = rep(0.2, 4),
-                      legend_type = 1) {
+                      legend_type = 1, legend_size = 0.4,
+                      bg = "dark blue") {
   
   old.par = par(no.readonly = TRUE)
   
@@ -321,13 +323,14 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
       plot_map(z_csy[c,,y], inla_proj = inla_proj, leglim = leglim_c[c,],
                land = land, pretty = pretty, cex.text = cex.text, 
                xlim = xlim, ylim = ylim, col.text = col.text,
-               legend_type = legend_type)
+               legend_type = legend_type, bg = bg)
       box()
     }
   }
   if (legend_type == 2) {
     par(xpd = NA)
-    cols = colorRampPalette(c("dark blue", 
+    
+    cols = colorRampPalette(c(bg, 
                               "light yellow", "yellow",
                               "red", "maroon"))(ncols)
     
@@ -336,9 +339,9 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     xl = usr[1]; xr = usr[2]; yb = usr[3]; yt = usr[4]
 
     h = yt - yb; w = xr - xl
-    rl = xl + 0.6*w; rr = xl + 0.9*w
-    rb = head(seq(yb + 0.3*h, yt - 0.3*h, len = ncols), -1)
-    rt = tail(seq(yb + 0.3*h, yt - 0.3*h, len = ncols), -1)
+    rl = xl + 0.6*w; rr = xl + 0.8*w
+    rb = head(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
+    rt = tail(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
     rect(rl, rb, rr, rt, col = cols, border = NA)
     rect(rl, head(seq(min(rb), max(rt), len = 5), -2), rr,
          tail(seq(min(rb), max(rt), len = 5), -2))
