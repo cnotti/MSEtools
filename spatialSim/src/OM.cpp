@@ -146,12 +146,14 @@ vector<int> drop_y_from_x(vector<int> x, vector<int> y) {
   int nNew = nx - ny;
   vector<int> res(nNew);
   const int negInf = -std::numeric_limits<int>::max();
-  vector<int> indexes(ny);
+  int index;
   
   for (int i=0; i<ny; i++) {
     auto it = std::find(x.data(), x.data() + nx, y(i));
-    indexes(i) = std::distance(x.data(), it);
-    x(indexes(i)) = negInf;
+    if (it != x.data() + nx) {
+      index = std::distance(x.data(), it);
+      x(index) = negInf;
+    }
   }
   /*std::partial_sort(x.data(), 
                     x.data() + ny, 
