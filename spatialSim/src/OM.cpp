@@ -456,6 +456,7 @@ Type objective_function<Type>::operator() () {
           calc_recruit(R_cst_l(c,s,t-1), R0_c(c) * areas, SSB0_c(c), SSB_ct_s(c,t-1), s_cs_sstar(cs),
                        h_c(c), E_cst(c,s,t-1), psi_l, psi_p(p_t(t)), psi_cs(c,s));
           N_cst_l(c,s,t) = G_c_ll(c) * (N_cst_l(c,s,t-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
+          // N_csta_l(c,s,t,a) = G_c_ll(c) * (N_csta_l(c,s,t-1,a-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
         }
         B_ct_s(c,t)(s) = (weight_c_1l(c) * N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c)))(0,0) / areas * areadredge;
         // reshape and scale N for projection

@@ -58,6 +58,7 @@ setup_om = function(
   loc_f,
   mesh,
   lnaniso = rep(0, 4),
+  projection = "utm",
   
   # population size structure
   lmin_c = rep(0, nc), 
@@ -221,7 +222,17 @@ setup_om = function(
     # calculate nodes within spawning range of each s
     s_cs_sstar = vector("list", nc*ns)
     cs = 1
-    distmat = geosphere::distm(loc_s, loc_s)/1000
+    # distance between s and s' in km
+    if (projection == "utm") {
+      dist_utm = function(xy.from, xy.to) {
+        sqrt( (xy.from[1] - xy.to[,1])^2 + (xy.from[2] - xy.to[,2])^2)
+      }
+      xy.from = lapply(seq_len(nrow(loc_s)), function(i) loc_s[i,])
+      distmat = sapply(xy.from, function(xy.from) dist_utm(xy.from, loc_s))/1000
+    } else if (projection == "ll") {
+      distmat = geosphere::distm(loc_s, loc_s)/1000
+    }
+    
     for (c in 1:nc) {
       for (s in 1:ns) {
         s_cs_sstar[[cs]] = which(distmat[,s] < Rrange_c[c]) - 1
