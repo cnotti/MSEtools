@@ -155,6 +155,7 @@ Type objective_function<Type>::operator() () {
       }
     }
     
+    REPORT(gE_csn);
     REPORT(E_csb);
     REPORT(E_cst);
     REPORT(Emean);
@@ -163,6 +164,7 @@ Type objective_function<Type>::operator() () {
     REPORT(I_t);
     REPORT(Imean);
     
+    REPORT(gH_snl);
     REPORT(H_sbl);
     REPORT(H_stl);
     REPORT(Hmean);
