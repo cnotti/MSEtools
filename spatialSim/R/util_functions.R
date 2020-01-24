@@ -172,8 +172,8 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
     image(lon, lat, zmat, xaxt = "n", yaxt = "n",
           col =  cols, breaks = seq(leglim[1], leglim[2], len = ncols + 1),
           asp = 1, xlim = xlim, ylim = ylim)
-    plot(domain, add = TRUE, bg = "bg")
-    }
+    #plot(domain, add = TRUE, bg = bg)
+  }
   if (!missing(bath)) {
     plot(bath, deep = -22, shallow = -2, step=10, drawlabels = TRUE,
          col = "grey70", add = T)
