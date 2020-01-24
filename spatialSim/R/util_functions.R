@@ -172,7 +172,7 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
     image(lon, lat, zmat, xaxt = "n", yaxt = "n",
           col =  cols, breaks = seq(leglim[1], leglim[2], len = ncols + 1),
           asp = 1, xlim = xlim, ylim = ylim)
-    plot(domain, add = TRUE, bg = "gray")
+    plot(domain, add = TRUE, bg = "bg")
     }
   if (!missing(bath)) {
     plot(bath, deep = -22, shallow = -2, step=10, drawlabels = TRUE,
@@ -324,7 +324,7 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                land = land, pretty = pretty, cex.text = cex.text, 
                xlim = xlim, ylim = ylim, col.text = col.text,
                legend_type = legend_type, bg = bg)
-      box()
+      #box()
     }
   }
   if (legend_type == 2) {

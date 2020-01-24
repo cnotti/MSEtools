@@ -1,7 +1,3 @@
-# decorrelation distance
-#geosphere::distm(c(174.025, -41.52), c(174.025 + sqrt(8)/exp(3), -41.52))
-#geosphere::distm(c(174.025, -41.52), c(174.025 + sqrt(8)/exp(4.5), -41.52))
-
 library("spatialSim")
 
 seed = 50
@@ -175,7 +171,7 @@ for (j in 1:5) {
       
       # recruitment
       fn_mature = fn_mature,
-      R0_c = exp(c(5.5, 3.75)),
+      R0_c = exp(c(5, 3)),
       h_c = c(0.5, 0.5),
       psi_p = c(rep(0, np/2), rep(1/(np/2), np/2)),
       psi_l = matrix(c(1, rep(0, nl - 1)), ncol = 1), 
@@ -187,6 +183,7 @@ for (j in 1:5) {
       Rrange_c = rep(0.05, nc),
       
       # spatial objects
+      projection = "ll",
       loc_s = loc_s,
       loc_f = loc_f,
       mesh = mesh_om,
@@ -206,5 +203,34 @@ for (j in 1:5) {
     om_out[[i]] = om(data = data_om, seed = seed)
     harvest_times[[i]][j] = om_out[[i]][["harvest_time"]]
   }
+}
+
+if (FALSE) {
+  # decorrelation distance
+  geosphere::distm(c(174.025, -41.52), c(174.025 + sqrt(8)/exp(3), -41.52))
+  geosphere::distm(c(174.025, -41.52), c(174.025 + sqrt(8)/exp(4.5), -41.52))
+  
+  # plots
+  data_om = om_out[[i]]$data_om
+  om_rep = om_out[[i]]$om_rep
+  B_cst = with(data_om, array(0, dim = c(nc, mesh_om$n, nt)))
+  y_t = NULL
+  for (c in 1:data_om[["nc"]]) {
+    for (t in 1:data_om[["nt"]]) {
+      y_t[t] = floor((t - 1)/12) + 1
+      B_cst[c,data_om[["splus_s"]]+1,t] = om_rep[["B_cst"]][c,,t]/areaf*data_om$ns
+    }
+  }
+  proj_om = inla.mesh.projector(mesh_om, dims = c(200,200))
+  pdf("C:/Users/Chris/OneDrive - The University of Auckland/PhD/PhD_Write_up/article1/casestudy.pdf", 
+      height = 8.75, width = 6.5)
+  plot_map_cy(z_csy = B_cst[,,(1:5)*12-11], inla_proj = proj_om,
+              lab_y = seq(1, 5, 1), leglim_c = rbind(c(0,1), c(0,1)), ncols = 500,
+              height = 9, p_width = 0.2, mar = rep(0.25, 4),
+              legend_type = 2, species_names = c("S. aequilatera", "M. murchisoni"),
+              xlim = xx, ylim = yy) #235
+  dev.off()
+
+  
 }
 
