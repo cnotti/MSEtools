@@ -52,7 +52,7 @@ setup_om = function(
   phiEt,
   Rho_cc,
   Rrange_c,
-  Rthreshold,
+  Rthreshold = 0,
   
   # spatial objects
   loc_s,
