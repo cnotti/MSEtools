@@ -166,14 +166,19 @@ void calc_recruit(matrix<double>& R_cst_l,
                   double E_cst, 
                   matrix<double> psi_l, 
                   double psi_p,
-                  double psi_d) {
+                  double psi_d,
+                  double Rthreshhold) {
   int nsstar = s_cs_sstar.size();
   double SSBavail = 0;
   for (int sstar = 0; sstar < nsstar; sstar++) {
     SSBavail += SSB_ct_s(s_cs_sstar(sstar));
   }
   double pSSB = SSBavail/nsstar / SSB0_c;
-  R_cst_l = R0 * pSSB / (1 - ((5 * h - 1)/(4 * h))*(1 - pSSB)) * E_cst * psi_p*psi_d*psi_l;
+  if (pSSB < Rthreshhold) {
+    R_cst_l = 0;
+  } else {
+    R_cst_l = R0 * pSSB / (1 - ((5 * h - 1)/(4 * h))*(1 - pSSB)) * E_cst * psi_p*psi_d*psi_l;
+  }
 }
 
 
