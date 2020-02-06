@@ -222,7 +222,7 @@ Type objective_function<Type>::operator() () {
   // recruitment
   DATA_DVECTOR(R0_c);
   DATA_DVECTOR(h_c);
-  DATA_DSCALAR(Rthreshold);
+  DATA_DVECTOR(Rthreshold_c);
   DATA_DMATRIX(pmat_cl);
   DATA_DVECTOR(psi_p);
   DATA_DMATRIX(psi_l);
@@ -397,7 +397,7 @@ Type objective_function<Type>::operator() () {
               SSB0_c(c) /= n0_c(c);
             }
             calc_recruit(R_l, R0_c(c) * areas, SSB0_c(c), SSB_cb_s(c,b-1), s_cs_sstar(cs),
-                         h_c(c), E_csb(c,s,b-1), psi_l, psi_p(p), psi_cs(c,s), Rthreshold);      
+                         h_c(c), E_csb(c,s,b-1), psi_l, psi_p(p), psi_cs(c,s), Rthreshold_c(c));      
             // natural mortality
             for (int l=0; l<nl; l++) {
               S_l(l) = exp(-M_csbl(c,s,b-1,l));
@@ -445,7 +445,7 @@ Type objective_function<Type>::operator() () {
             S_l(l) = exp(-M_csbl(c,s,nb-1,l));
           }
           calc_recruit(R_l, R0_c(c) * areas, SSB0_c(c), SSB_cb_s(c,nb-1), s_cs_sstar(cs),
-                       h_c(c), E_csb(c,s,nb-1), psi_l, psi_p(p_t(t)), psi_cs(c,s), Rthreshold);          
+                       h_c(c), E_csb(c,s,nb-1), psi_l, psi_p(p_t(t)), psi_cs(c,s), Rthreshold_c(c));          
           N_cst_l(c,s,t) = G_c_ll(c) * ( (N_csb_l(c,s,nb-1) + R_l).cwiseProduct(S_l) );
         }
         if (t > 0) {
@@ -455,7 +455,7 @@ Type objective_function<Type>::operator() () {
           }
           // numbers at beginning of time t subject to fishing, growth, and natural mortality
           calc_recruit(R_cst_l(c,s,t-1), R0_c(c) * areas, SSB0_c(c), SSB_ct_s(c,t-1), s_cs_sstar(cs),
-                       h_c(c), E_cst(c,s,t-1), psi_l, psi_p(p_t(t)), psi_cs(c,s), Rthreshold);
+                       h_c(c), E_cst(c,s,t-1), psi_l, psi_p(p_t(t)), psi_cs(c,s), Rthreshold_c(c));
           N_cst_l(c,s,t) = G_c_ll(c) * (N_cst_l(c,s,t-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
           // N_csta_l(c,s,t,a) = G_c_ll(c) * (N_csta_l(c,s,t-1,a-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
         }
