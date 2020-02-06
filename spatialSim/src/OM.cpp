@@ -222,7 +222,7 @@ Type objective_function<Type>::operator() () {
   // recruitment
   DATA_DVECTOR(R0_c);
   DATA_DVECTOR(h_c);
-  DATA_DVECTOR(Rthreshhold);
+  DATA_DSCALAR(Rthreshhold);
   DATA_DMATRIX(pmat_cl);
   DATA_DVECTOR(psi_p);
   DATA_DMATRIX(psi_l);
