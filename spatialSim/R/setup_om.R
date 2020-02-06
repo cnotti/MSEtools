@@ -52,7 +52,7 @@ setup_om = function(
   phiEt,
   Rho_cc,
   Rrange_c,
-  Rthreshold = 0,
+  Rthreshold_c = 0,
   
   # spatial objects
   loc_s,
@@ -320,7 +320,7 @@ setup_om = function(
       kappaE = kappaE,
       phiEt = phiEt,
       Rho_cc = Rho_cc,
-      Rthreshold = Rthreshold,
+      Rthreshold_c = Rthreshold_c,
       
       # spde objects
       spde = spde,
