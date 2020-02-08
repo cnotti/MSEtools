@@ -219,6 +219,7 @@ Type objective_function<Type>::operator() () {
   DATA_DSCALAR(F_intensity);         // proportion of an area that will be fished at time t
   DATA_IVECTOR(F_settings);          // set whether muF is defined by mean or median 
   DATA_DSCALAR(probZero);
+  DATA_DSCALAR(catchZero);
   
   // recruitment
   DATA_DVECTOR(R0_c);
@@ -357,7 +358,6 @@ Type objective_function<Type>::operator() () {
   std::default_random_engine generator;
   std::bernoulli_distribution rbernoulli(1 - probZero);
   double ran;
-  double lmuBf;
   
   //---------------------------//
   // population initialization //
@@ -574,9 +574,8 @@ Type objective_function<Type>::operator() () {
 
         // add random prob of empty dredge and update catch
         if (probZero > 0) {
-        lmuBf = 0.1 * muBf;
           for (int i=0; i<(nsamps+nsurv); i++) {
-            if (catch_i.tail(nsamps+nsurv)(i) < lmuBf) {
+            if (catch_i.tail(nsamps+nsurv)(i) < catchZero) {
               ran = rbernoulli(generator);
               catch_i.tail(nsamps+nsurv)(i) *= ran;
               ncatch_il.bottomRows(nsamps+nsurv).row(i) *= ran;
