@@ -218,7 +218,8 @@ Type objective_function<Type>::operator() () {
   DATA_DSCALAR(ptarget);             // site sampling probability given B_i > x 
   DATA_DSCALAR(F_intensity);         // proportion of an area that will be fished at time t
   DATA_IVECTOR(F_settings);          // set whether muF is defined by mean or median 
-        
+  DATA_DSCALAR(probZero);
+  
   // recruitment
   DATA_DVECTOR(R0_c);
   DATA_DVECTOR(h_c);
@@ -352,6 +353,11 @@ Type objective_function<Type>::operator() () {
     maxpsis_c(c) = psi_cs.row(c).maxCoeff();
   }
   
+  // random generator for zero cathes
+  std::default_random_engine generator;
+  std::bernoulli_distribution rbernoulli(probZero);
+  double ran;
+  double lmuBf;
   
   //---------------------------//
   // population initialization //
@@ -566,6 +572,18 @@ Type objective_function<Type>::operator() () {
         std::fill(c_i.data() + ni, c_i.data() + niNew, c);
         std::fill(t_i.data() + ni, t_i.data() + niNew, t);
 
+        // add random prob of empty dredge and update catch
+        if (probZero > 0) {
+        lmuBf = 0.1 * muBf;
+          for (int i=0; i<(nsamps+nsurv); i++) {
+            if (catch_i.tail(nsamps+nsurv)(i) < lmuBf) {
+              ran = rbernoulli(generator);
+              catch_i.tail(nsamps+nsurv)(i) *= ran;
+              ncatch_il.bottomRows(nsamps+nsurv).row(i) *= ran;
+            }
+          }
+        }
+        
         // map catch back to triangulation nodes and remove from population
         proj_1s = mat_indexing(Ad_fs, f_i.tail(nsurv + nsamps), cols_s).colwise().sum();
         for (int s=0; s<ns; ++s) {
