@@ -355,7 +355,7 @@ Type objective_function<Type>::operator() () {
   
   // random generator for zero cathes
   std::default_random_engine generator;
-  std::bernoulli_distribution rbernoulli(probZero);
+  std::bernoulli_distribution rbernoulli(1 - probZero);
   double ran;
   double lmuBf;
   

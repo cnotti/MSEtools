@@ -38,6 +38,7 @@ setup_om = function(
   F_settings = 0,
   f_c_fstar,
   f_ct_fsurv,
+  probZero,
   
   # recruitment
   fn_mature,
@@ -305,6 +306,7 @@ setup_om = function(
       F_settings = F_settings,
       f_c_fstar = f_c_fstar,
       f_ct_fsurv = f_ct_fsurv,
+      probZero = probZero,
       
       # recruitment
       R0_c = R0_c,
