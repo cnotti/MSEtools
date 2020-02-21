@@ -38,7 +38,7 @@ setup_om = function(
   F_settings = 0,
   f_c_fstar,
   f_ct_fsurv,
-  probZero = 1,
+  probZero = 0,
   catchZero = 0,
   
   # recruitment
@@ -217,11 +217,6 @@ setup_om = function(
       warning("Check A_fs. One ore more grid locations may be outside domain")
     }
 
-    f_xq = matrix(0, nrow = nx, ncol = nq)
-    for (q in 1:nq) {
-      f_xq[, q] = sample(1:nf, nx, replace = FALSE) - 1
-    }
-    
     # calculate nodes within spawning range of each s
     s_cs_sstar = vector("list", nc*ns)
     cs = 1
@@ -268,7 +263,6 @@ setup_om = function(
       nf = nf,
       p_t = p_t,
       splus_s = splus_s,
-      f_xq = f_xq, 
       t_catch = t_catch, 
       nfishp = nfishp, 
       fishp1 = fishp1,

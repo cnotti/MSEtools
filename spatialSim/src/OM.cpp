@@ -193,7 +193,6 @@ Type objective_function<Type>::operator() () {
   DATA_INTEGER(nl);                 // number of size intervals
   DATA_INTEGER(nf);                 // number of fishable area-swept nodes
   DATA_IVECTOR(p_t);               // period at each time point
-  DATA_IMATRIX(f_xq);        	      // association of each survey tow with a given fishing location f
   DATA_IVECTOR(t_catch);            // periods with available(1)/unavailable(0) catch_t data
   DATA_INTEGER(nfishp);             // number of periods in fishing season
   DATA_STRUCT(f_c_fstar, IVECTORlist_t);  // species specific harvest locations f 
