@@ -189,7 +189,6 @@ Type objective_function<Type>::operator() () {
   DATA_INTEGER(nt);                 // total number of time-steps (ny * np)
   DATA_INTEGER(nc);                 // number of species
   DATA_INTEGER(ns);                 // number of vertices in SPDE mesh
-  DATA_INTEGER(nx);                 // number of survey tows
   DATA_INTEGER(nl);                 // number of size intervals
   DATA_INTEGER(nf);                 // number of fishable area-swept nodes
   DATA_IVECTOR(p_t);               // period at each time point
