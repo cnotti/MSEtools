@@ -264,7 +264,8 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                       species_names = NULL, height = 5,
                       p_width = 0.3, mar = rep(0.2, 4),
                       legend_type = 1, legend_size = 0.4,
-                      bg = "dark blue") {
+                      bg = "dark blue", 
+                      padin_arr = c(0, 0), padin_bar = c(0, 0)) {
   
   old.par = par(no.readonly = TRUE)
   
@@ -308,7 +309,7 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
   for (y in 1:ny) {
     plot.new()
     rect(-2, -2, 2, 2, border = "black", col = "light gray")
-    text(0.5, 0.5, paste("y =", lab_y[y]))
+    text(0.5, 0.5, paste("yr", lab_y[y]))
     box()
   }
   if (is.null(leglim_c)) {
@@ -327,6 +328,10 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
       #box()
     }
   }
+  par(xpd = NA)
+  prettymapr::addnortharrow(pos = "bottomright", scale = 0.5, padin_arr)
+  prettymapr::addscalebar(pos = "bottomright", padin = padin_bar, labelpadin = 0.02, widthhint = 0.55)
+  
   if (legend_type == 2) {
     par(xpd = NA)
     
@@ -348,6 +353,7 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     text(rl - (rr-rl)*1, seq(min(rb), max(rt), len = 5)[2:4],
          sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2))[2:4],
          cex = cex.text, col = col.text)
+    
   }
   par(old.par)
 }

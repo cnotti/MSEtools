@@ -7,6 +7,7 @@ n_cases = 20L
 n_mult = 4L
 om_out = vector("list", n_cases)
 harvest_times = vector("list", n_cases)
+
 for (j in 1:5) {
   for (i in 1:n_cases) {
     # number of species
@@ -27,7 +28,6 @@ for (j in 1:5) {
     ns = nrow(loc_s)
     mesh_om = inla.mesh.2d(loc_s, max.n.strict = 3000, 
                            offset = c(0.005, 0.025))
-    
     
     coords = cbind(c(xx[1], xx[2], xx[2], xx[1], xx[1]),
                    c(yy[1], yy[1], yy[2], yy[2], yy[1]))

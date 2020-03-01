@@ -53,13 +53,13 @@ setup_om = function(
   phiEt,
   Rho_cc,
   Rrange_c,
-  Rthreshold_c = 0,
+  Rthreshold_c = rep(0,nc),
   
   # spatial objects
   loc_s,
   loc_f,
   mesh,
-  lnaniso = rep(0, 4),
+  lnaniso = rep(0, 2),
   projection = "utm",
   
   # population size structure
