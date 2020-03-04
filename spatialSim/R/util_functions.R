@@ -259,12 +259,12 @@ plot_map_gif = function(z_i_st, inla_proj, land, bath, p1 = 1, y1 = 2018,
 #' @export
 plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                       p, y, leglim_c = NULL, cex.text = 1,
-                      xlim, ylim, col.text = "black",
-                      np = 12, ncols = 100, pretty = TRUE,
+                      xlim, ylim, col.text = "black", no = 1,
+                      lab_om = 1:no, np = 12, ncols = 100, pretty = TRUE,
                       species_names = NULL, height = 5,
                       p_width = 0.3, mar = rep(0.2, 4),
                       legend_type = 1, legend_size = 0.4,
-                      bg = "dark blue", 
+                      bg = "dark blue", widthhint = 0.55,
                       padin_arr = c(0, 0), padin_bar = c(0, 0)) {
   
   old.par = par(no.readonly = TRUE)
@@ -275,6 +275,7 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
   # set up plot region
   par(mfrow = c(ny, nc), mar = mar, oma = c(0,4,0,0), xpd = F)
   
+  
   if (legend_type == 1) {
     Lmat = matrix(0, ncol = nc+1, nrow = ny+1)
     Lmat[1,2:(nc+1)] = 1:nc
@@ -283,19 +284,30 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     layout(mat = t(Lmat), 
            heights = c(lcm(0.65), rep(lcm(height), nc)), 
            widths = c(lcm(0.65), rep(lcm(height*p_width), ny)))
-  } else if (legend_type == 2) {
+  } else if (legend_type == 2 | legend_type == 0) {
     Lmat = matrix(0, ncol = nc+1, nrow = ny+2)
     Lmat[1,2:(nc+1)] = 1:nc
     Lmat[2:(ny+1),1] = (nc+1):(nc+ny)
     Lmat[2:(ny+1),2:(nc+1)] = (nc+ny+1):(((nc+1)*(ny+1)) - 1)
-    
     Lmat[ny+2,2:(nc+1)] = (nc+1)*(ny+1)
-    
-    layout(mat = t(Lmat), 
-           heights = c(lcm(0.65), rep(lcm(height), nc)), 
-           widths = c(lcm(0.65), rep(lcm(height*p_width), ny), lcm(2)))
-  }
-  
+    if (no > 1) {
+      Lmat = rbind(c(0, rep((max(Lmat)+1):(max(Lmat)+no), each = ny/no), 0), t(Lmat))
+      heights = c(lcm(0.65), 
+                  lcm(0.65),
+                  rep(lcm(height), nc))
+      widths = c(lcm(0.65), 
+                 rep(lcm(height*p_width), ny), 
+                 lcm(2))
+    } else {
+      Lmat = t(Lmat)
+      heights = c(lcm(0.65), 
+                  rep(lcm(height), nc))
+      widths = c(lcm(0.65), 
+                 rep(lcm(height*p_width), ny), 
+                 lcm(2))
+    }
+    layout(mat = Lmat, heights = heights, widths = widths)
+  } 
   
   # plot labels
   if (is.null(species_names)) species_names = 1:nc
@@ -328,12 +340,12 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
       #box()
     }
   }
-  par(xpd = NA)
-  prettymapr::addnortharrow(pos = "bottomright", scale = 0.5, padin_arr)
-  prettymapr::addscalebar(pos = "bottomright", padin = padin_bar, labelpadin = 0.02, widthhint = 0.55)
-  
+
   if (legend_type == 2) {
     par(xpd = NA)
+    
+    prettymapr::addnortharrow(pos = "bottomright", scale = 0.5, padin_arr)
+    prettymapr::addscalebar(pos = "bottomright", padin = padin_bar, labelpadin = 0.02, widthhint = widthhint)
     
     cols = colorRampPalette(c(bg, 
                               "light yellow", "yellow",
@@ -355,6 +367,45 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
          cex = cex.text, col = col.text)
     
   }
+  
+  if (legend_type == 0) {
+    par(xpd = NA)
+    
+    prettymapr::addnortharrow(pos = "bottomright", scale = 0.5, padin_arr)
+    prettymapr::addscalebar(pos = "bottomright", padin = padin_bar, 
+                            labelpadin = 0.02, widthhint = widthhint)
+    
+    cols = colorRampPalette(c(bg, 
+                              "light yellow", "yellow",
+                              "red", "maroon"))(ncols)
+    
+    plot.new()
+    usr = par("usr")
+    xl = usr[1]; xr = usr[2]; yb = usr[3]; yt = usr[4]
+    
+    h = yt - yb; w = xr - xl
+    rl = xl + 0.2*w; rr = xl + 0.4*w
+    rb = head(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
+    rt = tail(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
+    rect(rl, rb, rr, rt, col = cols, border = NA)
+    rect(rl, head(seq(min(rb), max(rt), len = 5), -2), rr,
+         tail(seq(min(rb), max(rt), len = 5), -2))
+    text(rr - (rl-rr)*1, seq(min(rb), max(rt), len = 5)[2:4],
+         sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2))[2:4],
+         cex = cex.text, col = col.text, srt = 90)
+    
+  }
+  
+  if (no > 1) {
+    for (o in 1:no) {
+      par(xpd = F)
+      plot.new()
+      rect(-2, -2, 2, 2, border = "black", col = "light gray")
+      text(0.5, 0.5, lab_om[o])
+      box()
+    }
+  }
+  
   par(old.par)
 }
 
