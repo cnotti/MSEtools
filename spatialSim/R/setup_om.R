@@ -317,6 +317,7 @@ setup_om = function(
       phiEt = phiEt,
       Rho_cc = Rho_cc,
       Rthreshold_c = Rthreshold_c,
+      optionRrange = 0,
       
       # spde objects
       spde = spde,

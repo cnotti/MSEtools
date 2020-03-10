@@ -155,6 +155,14 @@ void calc_G(matrix<double>& G, vector<double> lmid, double omega,
 }
 
 
+// median function. Note, approx. for even numbers.
+double median(vector<double> v) {
+  // calculate the median from all the points
+  size_t n = v.size() / 2;
+  std::nth_element(v.data(), v.data() + n, v.data() + v.size());
+  return v[n];
+}
+
 
 // recruitment calculations
 void calc_recruit(matrix<double>& R_cst_l, 
@@ -167,13 +175,25 @@ void calc_recruit(matrix<double>& R_cst_l,
                   matrix<double> psi_l, 
                   double psi_p,
                   double psi_d,
-                  double Rthreshold) {
+                  double Rthreshold,
+                  int optionRrange) {
   int nsstar = s_cs_sstar.size();
   double SSBavail = 0;
-  for (int sstar = 0; sstar < nsstar; sstar++) {
-    SSBavail += SSB_ct_s(s_cs_sstar(sstar));
+  
+  if (nsstar == 1) {
+    SSBavail = SSB_ct_s(s_cs_sstar(0));
+  } 
+  else if (optionRrange == 0) {
+    for (int sstar = 0; sstar < nsstar; sstar++) {
+      SSBavail += SSB_ct_s(s_cs_sstar(sstar));
+    }
+    SSBavail /= nsstar;
   }
-  double pSSB = SSBavail/nsstar / SSB0_c;
+  else if (optionRrange == 1) {
+    SSBavail = median(s_cs_sstar.unaryExpr(SSB_ct_s));
+  }
+  
+  double pSSB = SSBavail / SSB0_c;
   if (pSSB < Rthreshold) {
     R_cst_l = psi_l * 0;
   } else {
