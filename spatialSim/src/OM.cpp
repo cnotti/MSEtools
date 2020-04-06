@@ -1,8 +1,9 @@
 #define TMB_LIB_INIT R_init_OM
 
 #include <TMB.hpp>
-#include "functions.h"
 #include <numeric>
+#include "functions.h"
+
 
 #define DATA_DMATRIX(name)                                               \
 matrix<double> name(asMatrix<double>(                                    \
