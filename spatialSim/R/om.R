@@ -1,3 +1,29 @@
+#' Run operating model
+#'
+#' \code{om} runs the \code{operating model}
+#'
+#' @param a \code{NULL} or the number of time periods to run OM before updating management plan
+#' @param data_om tagged list containing model parameters
+#' @param seed seed for random number generation
+#' @param verbose if \code{TRUE} then runtime feedback is provided
+#' 
+#' @return object of class \code{om}, containing om output:
+#' 
+#' \describe{
+#'   \item{data_om}{updated list of model parameters}
+#'   \item{om_rep}{reported values from \code{C++} file}
+#'   \subitem{SSB0_c}{unfished spawning-stock-biomass for each species}
+#'   \subitem{N_csl}{numbers of individuals-at-size from last simulated time period. This variable is used for model re-entry when \code{a != NULL}.}
+#'   \subitem{B_cst}{}
+#'   \subitem{ncatch_cstl}{number of harvested individuals-at-size attributed to each mesh loation}
+#'   \subitem{c_i}{species associated with the ith harvest tow}
+#'   \subitem{f_i}{fishing grid cell associated with the ith harvest tow}
+#'   \subitem{t_i}{time period associated with the ith harvest tow}
+#'   \subitem{catch_i}{harvested biomass from ith harvest tow}
+#'   \subitem{ncatch_il}{harvested numbers-at-size from ith harvest tow}
+#'   \item{harvest_time}{information on model execution time}
+#' }
+#' 
 #' @export
 om = function(a = NULL, data_om, seed = NULL, verbose = TRUE) {
   set.seed(seed)
@@ -46,7 +72,27 @@ om = function(a = NULL, data_om, seed = NULL, verbose = TRUE) {
               "\n"))
   }
   
-  return(list(data_om = data_om,
-              om_rep  = om_rep,
-              harvest_time = run_time))
+  om_out = list(data_om = data_om,
+                om_rep  = om_rep,
+                harvest_time = run_time)
+  class(om_out) = "om"
+  return(om_out)
+}
+
+
+#' Print output from \code{\link{om}}
+#'
+#' @title Print data
+#' @param x Output from \code{\link{om}}
+#' @param ... Not used
+#' @return NULL
+#' @method print om
+#' @export
+print.om <- function(x, ...) {
+  cat(paste("om output for period up to t=", 
+            data_om[["tstop"]], 
+            "\n"))
+  cat(paste("harvest for previous period completed in", 
+            round(run_time, 3), attr(run_time, "units"),
+            "\n"))
 }

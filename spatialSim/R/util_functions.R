@@ -137,7 +137,7 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
 # plot results on map
 #' @export
 plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
-                    p, y, leglim = c(min(z_s), max(z_s)),
+                    p, y, leglim = c(min(zmat), max(zmat)), #leglim = c(min(z_s), max(z_s)),
                     xlim, ylim, np = 12, ncols = 100, pretty = TRUE, 
                     cex.text = 1, col.text = "black",
                     bg = "dark blue", ...) {
@@ -149,7 +149,7 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
   lon = inla_proj$x
   lat = inla_proj$y
   #if (pretty == TRUE) z_s = ifelse(z_s <= leglim[2], z_s, leglim[2])
-  zmat = inla.mesh.project(inla_proj, z_s)
+  #zmat = inla.mesh.project(inla_proj, z_s)
   if (pretty == TRUE) {
     zmat[zmat < leglim[1]] = leglim[1]
     zmat[zmat > leglim[2]] = leglim[2]
@@ -258,14 +258,14 @@ plot_map_gif = function(z_i_st, inla_proj, land, bath, p1 = 1, y1 = 2018,
 
 #' @export
 plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
-                      p, y, leglim_c = NULL, cex.text = 1,
-                      xlim, ylim, col.text = "black", no = 1,
-                      lab_om = 1:no, np = 12, ncols = 100, pretty = TRUE,
-                      species_names = NULL, height = 5,
-                      p_width = 0.3, mar = rep(0.2, 4),
-                      legend_type = 1, legend_size = 0.4,
-                      bg = "dark blue", widthhint = 0.55,
-                      padin_arr = c(0, 0), padin_bar = c(0, 0)) {
+                       p, y, leglim_c = NULL, cex.text = 1,
+                       xlim, ylim, col.text = "black", no = 1,
+                       lab_om = 1:no, np = 12, ncols = 100, pretty = TRUE,
+                       species_names = NULL, height = 5,
+                       p_width = 0.3, mar = rep(0.2, 4),
+                       legend_type = 1, legend_size = 0.4,
+                       bg = "dark blue", widthhint = 0.55,
+                       padin_arr = c(0, 0), padin_bar = c(0, 0)) {
   
   old.par = par(no.readonly = TRUE)
   
