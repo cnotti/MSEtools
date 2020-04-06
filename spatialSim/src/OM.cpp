@@ -2,6 +2,7 @@
 
 #include <TMB.hpp>
 #include "functions.h"
+#include <numeric>
 
 #define DATA_DMATRIX(name)                                               \
 matrix<double> name(asMatrix<double>(                                    \
