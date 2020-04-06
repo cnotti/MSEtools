@@ -2,6 +2,7 @@
 
 #include <TMB.hpp>
 #include <numeric>
+#include <random>
 #include "functions.h"
 
 
