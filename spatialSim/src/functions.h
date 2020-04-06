@@ -250,7 +250,7 @@ matrix<int> asInt(matrix<double> x) {
 
 
 // calculate haversine great circle distance between lat long points
-
+/*
 double distance(matrix<double> lonlat1, matrix<double> lonlat2) {
   double lon1 = lonlat1(0,0) * M_PI / 180.0;
   double lat1 = lonlat1(0,1) * M_PI / 180.0;
@@ -278,3 +278,4 @@ void randomize(vector<int>& v) {
         v(j) = temp; 
     }   
 }
+*/
