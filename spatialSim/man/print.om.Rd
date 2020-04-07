@@ -4,7 +4,7 @@
 \alias{print.om}
 \title{Print data}
 \usage{
-\method{print}{om}(x, ...)
+\method{print}{om}(x, units = "kg", ...)
 }
 \arguments{
 \item{x}{Output from \code{\link{om}}}

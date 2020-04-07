@@ -69,7 +69,7 @@ setup_om = function(
   
   # extra
   seed = NULL,
-  species_names = NULL
+  species_names = 1:nc
   
   ) {
     set.seed(seed)

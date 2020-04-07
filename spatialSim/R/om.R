@@ -75,15 +75,16 @@ om = function(a = NULL, data_om, seed = NULL, verbose = TRUE) {
                       type = "Fun", DLL = "OM")
   om_rep = om$report(unlist(data_om["dummyParameter"]))
   run_time = Sys.time() - t1
+  harvest_time = paste("harvest completed in", 
+                       round(run_time, 3), attr(run_time, "units"),
+                       "\n")
   if (verbose == TRUE) {
-    cat(paste("harvest completed in", 
-              round(run_time, 3), attr(run_time, "units"),
-              "\n"))
+    cat(harvest_time)
   }
   
   om_out = list(data_om = data_om,
                 om_rep  = om_rep,
-                harvest_time = run_time)
+                harvest_time = harvest_time)
   class(om_out) = "om"
   return(om_out)
 }
@@ -97,11 +98,30 @@ om = function(a = NULL, data_om, seed = NULL, verbose = TRUE) {
 #' @return NULL
 #' @method print om
 #' @export
-print.om <- function(x, ...) {
-  cat(paste("om output for period up to t=", 
-            data_om[["tstop"]], 
-            "\n"))
-  cat(paste("harvest for previous period completed in", 
-            round(run_time, 3), attr(run_time, "units"),
-            "\n"))
+print.om <- function(x, units = "kg", ...) {
+  Brange = round(apply(
+    apply(x$om_rep[["B_cst"]], c(1,3), "sum"), 1, "range")
+    )
+  
+  Brange.d = apply(
+    with(x$data_om, x$om_rep[["B_cst"]]/(areaOmegastar/ns)), 1, "range"
+  )
+  
+  cat("==================== OM summary ====================\n")
+  cat(paste("Output for period up to t =", 
+            x$data_om[["tstop"]], 
+            "\n\n"))
+  
+  for (c in 1:x$data_om$nc) {
+    cat(paste("Output for species c =", 
+              x$data_om$extra$species_names[c], ":\n"))
+    cat(paste("\t* total biomass range", 
+               paste(Brange[,c], collapse = " -- "), units, "\n"))
+    cat(paste("\t* density range per unit area sq:", 
+              paste(round(Brange.d[,c], 2), collapse = " -- "), units, "\n\n"))
+  }
+  
+  cat(x$harvest_time)
+  cat("====================================================\n")
 }
+
