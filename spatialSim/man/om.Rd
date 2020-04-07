@@ -16,7 +16,26 @@ om(a = NULL, data_om, seed = NULL, verbose = TRUE)
 \item{verbose}{if \code{TRUE} then runtime feedback is provided}
 }
 \value{
+object of class \code{om}, containing the om output:
 
+\describe{
+   \itemize{
+     \item data_om: updated list of model parameters
+     \item om_rep: reported values from \code{C++} file
+     \itemize{
+       \item SSB0_c: unfished spawning-stock-biomass for each species
+       \item N_csl: numbers of individuals-at-size from last simulated time period. This variable is used for model re-entry when \code{a != NULL}
+       \item B_cst: biomass by species, time and spatial location
+       \item ncatch_cst: number of harvested individuals-at-size attributed to each mesh loation
+       \item c_i: species associated with the ith harvest tow
+       \item f_i: fishing grid cell associated with the ith harvest tow
+       \item t_i: time period associated with the ith harvest tow
+       \item catch_i: harvested biomass from ith harvest tow
+       \item ncatch_il: harvested numbers-at-size from ith harvest tow
+     }
+     \item harvest_time: information on model execution time
+   }
+}
 }
 \description{
 \code{om} runs the \code{operating model}

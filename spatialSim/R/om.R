@@ -25,8 +25,8 @@
 #'        \item ncatch_il: harvested numbers-at-size from ith harvest tow
 #'      }
 #'      \item harvest_time: information on model execution time
+#'    }
 #' }
-#' 
 #' @export
 om = function(a = NULL, data_om, seed = NULL, verbose = TRUE) {
   set.seed(seed)
