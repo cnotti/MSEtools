@@ -117,12 +117,11 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
     drop = eval(
       parse(text = readline(prompt = "lines to drop (leave black to keep all lines): "))
     )
-    if (!is.na(drop)) {
+    if (all(!is.na(drop))) {
       Lines = coords[-drop]
     } else {
       Lines = coords
     }
-    
   } else {
     Lines = coords
   }
