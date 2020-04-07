@@ -7,7 +7,7 @@
 #' @param seed seed for random number generation
 #' @param verbose if \code{TRUE} then runtime feedback is provided
 #' 
-#' @return object of class \code{om}, containing om output:
+#' @return object of class \code{om}, containing the om output:
 #' 
 #' \describe{
 #'    \itemize{
