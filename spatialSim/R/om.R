@@ -12,6 +12,9 @@
 #' \describe{
 #'    \itemize{
 #'      \item \code{data_om}: updated list of model parameters
+#'      \itemize{
+#'        \item ...
+#'      }
 #'      \item \code{om_rep}: reported values from \code{C++} file
 #'      \itemize{
 #'        \item \code{SSB0_c}: unfished spawning-stock-biomass for each species
@@ -25,6 +28,9 @@
 #'        \item \code{ncatch_il}: harvested numbers-at-size from ith harvest tow
 #'      }
 #'      \item \code{harvest_time}: information on model execution time
+#'      \itemize{
+#'        \item ...
+#'      }
 #'    }
 #' }
 #' @export

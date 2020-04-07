@@ -21,6 +21,9 @@ object of class \code{om}, containing the om output:
 \describe{
    \itemize{
      \item \code{data_om}: updated list of model parameters
+     \itemize{
+       \item ...
+     }
      \item \code{om_rep}: reported values from \code{C++} file
      \itemize{
        \item \code{SSB0_c}: unfished spawning-stock-biomass for each species
@@ -34,6 +37,9 @@ object of class \code{om}, containing the om output:
        \item \code{ncatch_il}: harvested numbers-at-size from ith harvest tow
      }
      \item \code{harvest_time}: information on model execution time
+     \itemize{
+       \item ...
+     }
    }
 }
 }
