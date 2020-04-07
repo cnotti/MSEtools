@@ -9,4 +9,4 @@ Description: Spatial size structured operating model
 License: GPL-3
 Depends: TMB, RcppEigen, INLA, Matrix, sp, geosphere
 LinkingTo: TMB, RcppEigen, INLA, Matrix, sp, geosphere
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

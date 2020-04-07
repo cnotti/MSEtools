@@ -98,39 +98,58 @@ get_depth = function(lonlat, bath, levels = 0:(-20)) {
 # create depth polygon by joining depth contour lines
 #' @export
 make_depth_poly = function(bath, depth_range = c(0, -10), 
-                           domain_outer, reverseLine2 = TRUE) {
+                           domain_outer) {
   lon = unique(as.numeric(rownames(bath)))
   lat = unique(as.numeric(colnames(bath)))
   cont = contourLines(lon, lat, bath, levels = depth_range)
   c.lines = maptools::ContourLines2SLDF(cont)
-  depth_lines = gIntersection(c.lines, domain_outer)
+  depth_lines = rgeos::gIntersection(c.lines, domain_outer)
   # select which 2 lines to join
   coords = coordinates(depth_lines)[[1]]
   n = length(coords)
   if (n != 2) {
-    plot(depth_lines)
+    plot(depth_lines, main = "choose lines to drop")
     for (line in 1:length(coords)) {
       lines(coords[[line]][,1], coords[[line]][,2],
             col = rainbow(n)[line])
     }
     legend("topright", legend = 1:n, col = rainbow(n), lty = 1)
-    drop = as.numeric(readline(prompt = "lines to drop: "))
-    Lines = coords[-drop]
-  }
-  else {
+    drop = eval(
+      parse(text = readline(prompt = "lines to drop (leave black to keep all lines): "))
+    )
+    if (!is.na(drop)) {
+      Lines = coords[-drop]
+    } else {
+      Lines = coords
+    }
+    
+  } else {
     Lines = coords
   }
-  if (reverseLine2 == FALSE) {
-    domain_lines = do.call("rbind", list(Lines[[1]], 
-                                         Lines[[2]], 
-                                         Lines[[1]][1,]))
+
+  line_order = eval(
+    parse(text = readline(prompt = "order to join lines (exclude dropped lines): "))
+  )
+  line_rev = eval(
+    parse(text = readline(prompt = "lines to reverse for join (exclude dropped lines): "))
+  )
+  n2 = length(line_order)
+  domain_lines = vector("list", n2+1)
+  for (line in 1:n2) {
+    line_i = line_order[line]
+    if (line %in% line_rev) {
+      domain_lines[[line]] = Lines[[line_i]][nrow(Lines[[line_i]]):1,]
+    } else {
+      domain_lines[[line]] = Lines[[line_i]] 
+    }
   }
-  else if (reverseLine2 == TRUE) {
-    domain_lines = do.call("rbind", list(Lines[[1]], 
-                                         Lines[[2]][nrow(Lines[[2]]):1,], 
-                                         Lines[[1]][1,]))
-  }
-  SpatialPolygons(list(Polygons(list(Polygon(domain_lines)), "Domain")))
+  domain_lines[[n2+1]] = domain_lines[[1]][1,]
+  #domain_lines[[n2+1]] = Lines[[line_order[1]]][1,]
+  #SpatialPolygons(list(Polygons(list(Polygon(domain_lines)), "Domain")))
+  
+  SpatialPolygons(list(Polygons(list(Polygon(
+    do.call("rbind", domain_lines)
+    )), "Domain")))
 }
 
 
