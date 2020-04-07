@@ -20,10 +20,10 @@
 #'        \item \code{SSB0_c}: unfished spawning-stock-biomass for each species
 #'        \item \code{N_csl}: numbers of individuals-at-size from last simulated time period. This variable is used for model re-entry when \code{a != NULL}
 #'        \item \code{B_cst}: biomass by species, time and spatial location
-#'        \item \code{ncatch_cst}: number of harvested individuals-at-size attributed to each mesh loation
-#'        \item \code{c_i}: species associated with the ith harvest tow
-#'        \item \code{f_i}: fishing grid cell associated with the ith harvest tow
-#'        \item \code{t_i}: time period associated with the ith harvest tow
+#'        \item \code{ncatch_cstl}: number of harvested individuals-at-size attributed to each mesh loation
+#'        \item \code{c_i}: zero-indexed species associated with the ith harvest tow
+#'        \item \code{f_i}: zero-indexed fishing grid cell associated with the ith harvest tow
+#'        \item \code{t_i}: zero-indexed time period associated with the ith harvest tow
 #'        \item \code{catch_i}: harvested biomass from ith harvest tow
 #'        \item \code{ncatch_il}: harvested numbers-at-size from ith harvest tow
 #'      }

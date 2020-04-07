@@ -155,7 +155,7 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
 # plot results on map
 #' @export
 plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
-                    p, y, leglim = c(min(zmat), max(zmat)), #leglim = c(min(z_s), max(z_s)),
+                    p, y, leglim = c(min(z_s), max(z_s)), #leglim = c(min(z_s), max(z_s)),
                     xlim, ylim, np = 12, ncols = 100, pretty = TRUE, 
                     cex.text = 1, col.text = "black",
                     bg = "dark blue", ...) {
@@ -166,12 +166,12 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
 
   lon = inla_proj$x
   lat = inla_proj$y
-  #if (pretty == TRUE) z_s = ifelse(z_s <= leglim[2], z_s, leglim[2])
-  #zmat = inla.mesh.project(inla_proj, z_s)
-  if (pretty == TRUE) {
-    zmat[zmat < leglim[1]] = leglim[1]
-    zmat[zmat > leglim[2]] = leglim[2]
-  }
+  if (pretty == TRUE) z_s = ifelse(z_s <= leglim[2], z_s, leglim[2])
+  zmat = inla.mesh.project(inla_proj, z_s)
+  #if (pretty == TRUE) {
+  #  zmat[zmat < leglim[1]] = leglim[1]
+  #  zmat[zmat > leglim[2]] = leglim[2]
+  #}
   
   if (missing(xlim)) {
     xlim = c(min(lon), max(lon))
