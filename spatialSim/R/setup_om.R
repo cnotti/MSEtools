@@ -1,3 +1,62 @@
+#' Specify the settings and parameters of OM
+#'
+#' \code{setup_om} creates input list for \code{\link{om}}
+#'
+#' @param nb number of time-steps in initialization phase
+#' @param ny number of years
+#' @param np number of time-steps within each year
+#' @param nc number of species
+#' @param nl number of size intervals
+#' @param nfishp number of time-steps that make up commercial fishing season
+#' @param fishp1 index (zero-indexed) of first annual period of the fishing season 
+#' @param nyAssess number of years to run model before updating harvest restrictions
+#' @param fn_growth function specifying the growth of individuals
+#' @param fn_weight function specifying size-weight relationship
+#' @param sigmaG_c standard deviations of the expected growth increments on the log scale for each species
+#' @param alpha_c expected rates of instantaneous natural mortality for each species
+#' @param mugI expected value of iota
+#' @param mugH expected value of eta
+#' @param sigmagI marginal sd of iota
+#' @param taugH SPDE scale parameter of eta
+#' @param kappaH SPDE range parameter of eta
+#' @param phiIt temporal autocorrelation parameter of iota
+#' @param phiHt temporal autocorrelation parameter of eta
+#' @param phiHl size autocorrelation parameter of eta
+#' @param fn_select function specifying fishing selectivity
+#' @param limit_c harvest limit for each species
+#' @param areadredge area-swept by fishers
+#' @param ptarget probability of fishers harvesting from a sites with above average densities of individuals
+#' @param F_intensity Parameter controlling intensity of commercial harvesting
+#' @param f_c_fstar indices (zero-indexed) of \code{loc_f} making up sub-area of domain that commercial fishers will fish
+#' @param f_ct_fsurv indices (zero-indexed) of \code{loc_f} specifying survey sites
+#' @param probZero probability of sampling a zero catch given the potential catch at site i is less than \code{cathZero}
+#' @param catchZero if potential catch at site i is less than \code{catchZero} sample a zero with probability \code{probZero}
+#' @param fn_mature function specifying sexual maturity
+#' @param R0_c scale term of stock recruit function for each species
+#' @param h_c stock-recruit steepness parameters for each species
+#' @param psi_p probability of recruitment given the annaul period/season
+#' @param psi_l size distribution of new recruits
+#' @param psi_cs probability of an individual recruiting conditional on the environmental conditions at locations \code{loc_s}
+#' @param mugE expected value of epsilon
+#' @param taugE SPDE scale parameter of epsilon
+#' @param kappaE SPDE range parameter of epsilon
+#' @param phiEt temporal autocorrelation parameter of etpsilon
+#' @param Rho_cc species correlation matrix of epsilon
+#' @param Rrange_c Spawning range of sexually mature individuals for each species
+#' @param Rthreshold_c recruitment threshold for each species
+#' @param optionRrange if \code{optionRrange = 0} recruitment is based on mean SSB in region else if \code{optionRrange = 1} recruitment is based on median SSB in region
+#' @param loc_s node locations to track population dynamics
+#' @param loc_f harvest grid locations
+#' @param mesh INLA mesh object
+#' @param lnaniso anisotropy parameters
+#' @param projection "ll" = Longitude-Latitude or "utm"  = Universal Transverse Mercator
+#' @param lmin_c minimum sizes of individuals for each species
+#' @param lmax_c maximum sizes of individuals for each species
+#' @param seed RNG seed
+#' @param species_names labels representing the simulated species
+#' 
+#' @return an input list specifying the parameters for \code{\link{om}}:
+#'
 #' @export
 setup_om = function(
   
@@ -75,6 +134,7 @@ setup_om = function(
     set.seed(seed)
 
     # functions
+	# Growth transition matrix (in future release users may specify fn_G)
     fn_G = function(delta_cl, omega_c, sigmaG_c) {
       pow = function(x, p) {
         x^p
@@ -113,7 +173,7 @@ setup_om = function(
                 G_c_ll[[c]][j,k] = ifelse(isTRUE(all.equal(pr_b, pr_a)), 0, pr_b - pr_a)
               }
             }
-            # set neg growth probs to 0
+            # fill neg growth probs with 0
             if (k > j) {
               G_c_ll[[c]][j,k] = 0;
             }

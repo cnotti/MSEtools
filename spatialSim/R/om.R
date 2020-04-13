@@ -2,8 +2,8 @@
 #'
 #' \code{om} runs the \code{operating model}
 #'
-#' @param a \code{NULL} or the number of time periods to run OM before updating management plan
 #' @param data_om tagged list containing model parameters
+#' @param a \code{NULL} or the number of time periods to run OM before updating management plan
 #' @param seed seed for random number generation
 #' @param verbose if \code{TRUE} then runtime feedback is provided
 #' 
@@ -34,7 +34,7 @@
 #'    }
 #' }
 #' @export
-om = function(a = NULL, data_om, seed = NULL, verbose = TRUE) {
+om = function(data_om, a = NULL, seed = NULL, verbose = TRUE) {
   set.seed(seed)
 
   if (is.null(a) || a == 1) {

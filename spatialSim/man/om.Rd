@@ -4,12 +4,12 @@
 \alias{om}
 \title{Run operating model}
 \usage{
-om(a = NULL, data_om, seed = NULL, verbose = TRUE)
+om(data_om, a = NULL, seed = NULL, verbose = TRUE)
 }
 \arguments{
-\item{a}{\code{NULL} or the number of time periods to run OM before updating management plan}
-
 \item{data_om}{tagged list containing model parameters}
+
+\item{a}{\code{NULL} or the number of time periods to run OM before updating management plan}
 
 \item{seed}{seed for random number generation}
 
