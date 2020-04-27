@@ -81,7 +81,10 @@ calc_t = function(t_catch) {
 }
 
 
-# calculate depths from bath matrix contour lines
+
+#' EXPERIMENTAL
+#'
+#' \code{get_depth} calculate depths from bathy matrix contour lines
 #' @export
 get_depth = function(lonlat, bath, levels = 0:(-20)) {
   # bath much be matrix of depths where row/col names = lon/lat coords
@@ -95,7 +98,9 @@ get_depth = function(lonlat, bath, levels = 0:(-20)) {
   depth_s
 }
 
-# create depth polygon by joining depth contour lines
+#' EXPERIMENTAL
+#'
+#' \code{make_depth_poly} create depth polygon by joining depth contour lines
 #' @export
 make_depth_poly = function(bath, depth_range = c(0, -10), 
                            domain_outer) {
@@ -153,6 +158,7 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
 
 
 # plot results on map
+#' EXPERIMENTAL
 #' @export
 plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
                     p, y, leglim = c(min(z_s), max(z_s)), #leglim = c(min(z_s), max(z_s)),
@@ -239,6 +245,7 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
 }
 
 # function to plot spatio-temporal map as gif
+#' EXPERIMENTAL
 #' @export
 plot_map_gif = function(z_i_st, inla_proj, land, bath, p1 = 1, y1 = 2018,
                         leglim_i = lapply(z_i_st, function(z_st) c(0, max(z_st))),
@@ -273,7 +280,7 @@ plot_map_gif = function(z_i_st, inla_proj, land, bath, p1 = 1, y1 = 2018,
   }
 }
 
-
+#' EXPERIMENTAL
 #' @export
 plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                        p, y, leglim_c = NULL, cex.text = 1,

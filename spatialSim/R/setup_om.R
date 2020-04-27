@@ -25,8 +25,8 @@
 #' @param fn_select function specifying fishing selectivity
 #' @param limit_c harvest limit for each species
 #' @param areadredge area-swept by fishers
-#' @param ptarget probability of fishers harvesting from a sites with above average densities of individuals
-#' @param F_intensity Parameter controlling intensity of commercial harvesting
+#' @param ptarget probability of fishers harvesting from sites with above average densities of individuals
+#' @param F_intensity parameter controlling intensity of commercial harvesting
 #' @param f_c_fstar indices (zero-indexed) of \code{loc_f} making up sub-area of domain that commercial fishers will fish
 #' @param f_ct_fsurv indices (zero-indexed) of \code{loc_f} specifying survey sites
 #' @param probZero probability of sampling a zero catch given the potential catch at site i is less than \code{cathZero}

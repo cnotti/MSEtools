@@ -108,9 +108,9 @@ setup_om(
 
 \item{areadredge}{area-swept by fishers}
 
-\item{ptarget}{probability of fishers harvesting from a sites with above average densities of individuals}
+\item{ptarget}{probability of fishers harvesting from sites with above average densities of individuals}
 
-\item{F_intensity}{Parameter controlling intensity of commercial harvesting}
+\item{F_intensity}{parameter controlling intensity of commercial harvesting}
 
 \item{f_c_fstar}{indices (zero-indexed) of \code{loc_f} making up sub-area of domain that commercial fishers will fish}
 

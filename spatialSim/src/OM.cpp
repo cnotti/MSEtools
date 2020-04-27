@@ -432,7 +432,7 @@ Type objective_function<Type>::operator() () {
   // model state dynamics //
   //----------------------//
 
-  // state dynamics using innovations parameterization
+  // population dynamics
   for (int t=tstart; t<=tstop; t++) {
     cs = 0;
     for (int c=0; c<nc; c++) {
