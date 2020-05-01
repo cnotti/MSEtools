@@ -221,6 +221,8 @@ Type objective_function<Type>::operator() () {
   DATA_DVECTOR(psi_p);
   DATA_DMATRIX(psi_l);
   DATA_DMATRIX(psi_cs);              // prob of recruitment given environmental conditions at node s
+	DATA_DARRAY(psi_csb);                // scale psi_cs on (0,1)
+	DATA_DARRAY(psi_cst);                // scale psi_cs on (0,1)
   DATA_DARRAY(E_csb);                // burn-in recruitment innovations
   DATA_DARRAY(E_cst);                // RF on recruitment
   DATA_INTEGER(optionRrange);        // use mean or median SSB in Rrange to calc recruit
@@ -374,7 +376,7 @@ Type objective_function<Type>::operator() () {
           // during first half of initialization calculate SSB0_c
           else if (b < 2*nb/3) {
             // here, recruitment is based off SR = 1 
-            R_l = R0_c(c) * areas * E_csb(c,s,b-1) * psi_p(p) * psi_cs(c,s) * psi_l;
+            R_l = R0_c(c) * areas * E_csb(c,s,b-1) * psi_p(p) * psi_cs(c,s) * psi_csb(c,s,b-1) * psi_l;
             // natural mortality
             for (int l=0; l<nl; l++) {
               S_l(l) = exp(-M_csbl(c,s,b-1,l));
@@ -396,8 +398,8 @@ Type objective_function<Type>::operator() () {
               SSB0_c(c) /= n0_c(c);
             }
             calc_recruit(R_l, R0_c(c) * areas, SSB0_c(c), SSB_cb_s(c,b-1), s_cs_sstar(cs),
-                         h_c(c), E_csb(c,s,b-1), psi_l, psi_p(p), psi_cs(c,s), Rthreshold_c(c),
-                         optionRrange);      
+                         h_c(c), E_csb(c,s,b-1), psi_l, psi_p(p), psi_cs(c,s) * psi_csb(c,s,b-1), 
+												 Rthreshold_c(c), optionRrange);      
             // natural mortality
             for (int l=0; l<nl; l++) {
               S_l(l) = exp(-M_csbl(c,s,b-1,l));
@@ -445,8 +447,8 @@ Type objective_function<Type>::operator() () {
             S_l(l) = exp(-M_csbl(c,s,nb-1,l));
           }
           calc_recruit(R_l, R0_c(c) * areas, SSB0_c(c), SSB_cb_s(c,nb-1), s_cs_sstar(cs),
-                       h_c(c), E_csb(c,s,nb-1), psi_l, psi_p(p_t(t)), psi_cs(c,s), Rthreshold_c(c),
-                       optionRrange);          
+                       h_c(c), E_csb(c,s,nb-1), psi_l, psi_p(p_t(t)), psi_cs(c,s) * psi_csb(c,s,nb-1), 
+											 Rthreshold_c(c), optionRrange);          
           N_cst_l(c,s,t) = G_c_ll(c) * ( (N_csb_l(c,s,nb-1) + R_l).cwiseProduct(S_l) );
         }
         if (t > 0) {
@@ -456,8 +458,8 @@ Type objective_function<Type>::operator() () {
           }
           // numbers at beginning of time t subject to fishing, growth, and natural mortality
           calc_recruit(R_cst_l(c,s,t-1), R0_c(c) * areas, SSB0_c(c), SSB_ct_s(c,t-1), s_cs_sstar(cs),
-                       h_c(c), E_cst(c,s,t-1), psi_l, psi_p(p_t(t)), psi_cs(c,s), Rthreshold_c(c),
-                       optionRrange);
+                       h_c(c), E_cst(c,s,t-1), psi_l, psi_p(p_t(t)), psi_cs(c,s) * psi_cst(c,s,t-1), 
+											 Rthreshold_c(c), optionRrange);
           N_cst_l(c,s,t) = G_c_ll(c) * (N_cst_l(c,s,t-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
           // N_csta_l(c,s,t,a) = G_c_ll(c) * (N_csta_l(c,s,t-1,a-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
         }

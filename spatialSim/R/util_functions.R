@@ -102,7 +102,7 @@ get_depth = function(lonlat, bath, levels = 0:(-20)) {
 #'
 #' \code{make_depth_poly} create depth polygon by joining depth contour lines
 #' @export
-make_depth_poly = function(bath, depth_range = c(0, -10), 
+make_depth_poly = function(bath, depth_range = c(0, -10),
                            domain_outer) {
   lon = unique(as.numeric(rownames(bath)))
   lat = unique(as.numeric(colnames(bath)))
@@ -112,17 +112,17 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
   # select which 2 lines to join
   coords = coordinates(depth_lines)[[1]]
   n = length(coords)
+  plot(depth_lines, main = "choose lines to drop")
+  for (line in 1:length(coords)) {
+    lines(coords[[line]][,1], coords[[line]][,2],
+          col = rainbow(n)[line])
+  }
+  legend("topright", legend = 1:n, col = rainbow(n), lty = 1)
   if (n != 2) {
-    plot(depth_lines, main = "choose lines to drop")
-    for (line in 1:length(coords)) {
-      lines(coords[[line]][,1], coords[[line]][,2],
-            col = rainbow(n)[line])
-    }
-    legend("topright", legend = 1:n, col = rainbow(n), lty = 1)
     drop = eval(
       parse(text = readline(prompt = "lines to drop (leave black to keep all lines): "))
     )
-    if (all(!is.na(drop))) {
+    if (all(!is.null(drop))) {
       Lines = coords[-drop]
     } else {
       Lines = coords
@@ -134,6 +134,9 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
   line_order = eval(
     parse(text = readline(prompt = "order to join lines (exclude dropped lines): "))
   )
+  if (is.null(line_order)) {
+    line_order = 1:length(Lines)
+  }
   line_rev = eval(
     parse(text = readline(prompt = "lines to reverse for join (exclude dropped lines): "))
   )
@@ -142,31 +145,30 @@ make_depth_poly = function(bath, depth_range = c(0, -10),
   for (line in 1:n2) {
     line_i = line_order[line]
     if (line %in% line_rev) {
-      domain_lines[[line]] = Lines[[line_i]][nrow(Lines[[line_i]]):1,]
+      domain_lines[[line]] = Lines[[line_i]][nrow(Lines[[line_i]]):1,,drop=F]
     } else {
-      domain_lines[[line]] = Lines[[line_i]] 
+      domain_lines[[line]] = Lines[[line_i]]
     }
   }
-  domain_lines[[n2+1]] = domain_lines[[1]][1,]
+  domain_lines[[n2+1]] = domain_lines[[1]][1,,drop=F]
   #domain_lines[[n2+1]] = Lines[[line_order[1]]][1,]
   #SpatialPolygons(list(Polygons(list(Polygon(domain_lines)), "Domain")))
-  
+
   SpatialPolygons(list(Polygons(list(Polygon(
     do.call("rbind", domain_lines)
     )), "Domain")))
 }
-
 
 # plot results on map
 #' EXPERIMENTAL
 #' @export
 plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
                     p, y, leglim = c(min(z_s), max(z_s)), #leglim = c(min(z_s), max(z_s)),
-                    xlim, ylim, np = 12, ncols = 100, pretty = TRUE, 
+                    xlim, ylim, np = 12, ncols = 100, pretty = TRUE,
                     cex.text = 1, col.text = "black",
                     bg = "dark blue", ...) {
   # plot image
-  cols = colorRampPalette(c(bg, 
+  cols = colorRampPalette(c(bg,
                             "light yellow", "yellow",
                             "red", "maroon"))(ncols)
 
@@ -178,7 +180,7 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
   #  zmat[zmat < leglim[1]] = leglim[1]
   #  zmat[zmat > leglim[2]] = leglim[2]
   #}
-  
+
   if (missing(xlim)) {
     xlim = c(min(lon), max(lon))
   }
@@ -203,8 +205,8 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
          col = "grey70", add = T)
     scaleBathy(bath, deg = 0.05, x = "bottomright", inset = 8, col = "black")
   }
-  
-  
+
+
   usr = par("usr")
   xl = usr[1]; xr = usr[2]; yb = usr[3]; yt = usr[4]
 
@@ -215,10 +217,10 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
   domain_sp = SpatialPolygons(list(Polygons(list(Polygon(domain_coords, hole = TRUE),
                                                  Polygon(outer_coords)),
                                             "Domain")))
-  
+
   #plot(domain_sp, add = TRUE, col = bg, border = bg)
   #box()
-  
+
   # add legend
   if (legend_type == 1) {
     h = yt - yb; w = xr - xl
@@ -232,8 +234,8 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
          sprintf("%.2f", round(seq(leglim[1], leglim[2], len = 5), 2))[2:4],
          cex = cex.text, col = col.text)
   }
-  
-  
+
+
   if (!missing(p) & !missing(y)) {
     text(xl + 0.25*w, yt - 0.05*h, cex = 2,
          labels = paste0(sprintf(paste0("%0",nchar(np),"d"),
@@ -291,23 +293,23 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                        legend_type = 1, legend_size = 0.4,
                        bg = "dark blue", widthhint = 0.55,
                        padin_arr = c(0, 0), padin_bar = c(0, 0)) {
-  
+
   old.par = par(no.readonly = TRUE)
-  
+
   # get dims
   nc = dim(z_csy)[1]
   ny = dim(z_csy)[3]
   # set up plot region
   par(mfrow = c(ny, nc), mar = mar, oma = c(0,4,0,0), xpd = F)
-  
-  
+
+
   if (legend_type == 1) {
     Lmat = matrix(0, ncol = nc+1, nrow = ny+1)
     Lmat[1,2:(nc+1)] = 1:nc
     Lmat[2:(ny+1),1] = (nc+1):(nc+ny)
     Lmat[2:(ny+1),2:(nc+1)] = (nc+ny+1):(((nc+1)*(ny+1)) - 1)
-    layout(mat = t(Lmat), 
-           heights = c(lcm(0.65), rep(lcm(height), nc)), 
+    layout(mat = t(Lmat),
+           heights = c(lcm(0.65), rep(lcm(height), nc)),
            widths = c(lcm(0.65), rep(lcm(height*p_width), ny)))
   } else if (legend_type == 2 | legend_type == 0) {
     Lmat = matrix(0, ncol = nc+1, nrow = ny+2)
@@ -317,23 +319,23 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     Lmat[ny+2,2:(nc+1)] = (nc+1)*(ny+1)
     if (no > 1) {
       Lmat = rbind(c(0, rep((max(Lmat)+1):(max(Lmat)+no), each = ny/no), 0), t(Lmat))
-      heights = c(lcm(0.65), 
+      heights = c(lcm(0.65),
                   lcm(0.65),
                   rep(lcm(height), nc))
-      widths = c(lcm(0.65), 
-                 rep(lcm(height*p_width), ny), 
+      widths = c(lcm(0.65),
+                 rep(lcm(height*p_width), ny),
                  lcm(2))
     } else {
       Lmat = t(Lmat)
-      heights = c(lcm(0.65), 
+      heights = c(lcm(0.65),
                   rep(lcm(height), nc))
-      widths = c(lcm(0.65), 
-                 rep(lcm(height*p_width), ny), 
+      widths = c(lcm(0.65),
+                 rep(lcm(height*p_width), ny),
                  lcm(2))
     }
     layout(mat = Lmat, heights = heights, widths = widths)
-  } 
-  
+  }
+
   # plot labels
   if (is.null(species_names)) species_names = 1:nc
   for (c in 1:nc) {
@@ -351,15 +353,15 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
   }
   if (is.null(leglim_c)) {
     leglim_c = matrix(0, nrow = nc, ncol = 2)
-    for (c in 1:nc) { 
+    for (c in 1:nc) {
       leglim_c[c,] = c(min(z_csy[c,,]), max(z_csy[c,,])*0.9)
     }
   }
   # plot maps
-  for (c in 1:nc) {  
+  for (c in 1:nc) {
     for (y in 1:ny) {
       plot_map(z_csy[c,,y], inla_proj = inla_proj, leglim = leglim_c[c,],
-               land = land, pretty = pretty, cex.text = cex.text, 
+               land = land, pretty = pretty, cex.text = cex.text,
                xlim = xlim, ylim = ylim, col.text = col.text,
                legend_type = legend_type, bg = bg)
       #box()
@@ -368,14 +370,14 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
 
   if (legend_type == 2) {
     par(xpd = NA)
-    
+
     prettymapr::addnortharrow(pos = "bottomright", scale = 0.5, padin_arr)
     prettymapr::addscalebar(pos = "bottomright", padin = padin_bar, labelpadin = 0.02, widthhint = widthhint)
-    
-    cols = colorRampPalette(c(bg, 
+
+    cols = colorRampPalette(c(bg,
                               "light yellow", "yellow",
                               "red", "maroon"))(ncols)
-    
+
     plot.new()
     usr = par("usr")
     xl = usr[1]; xr = usr[2]; yb = usr[3]; yt = usr[4]
@@ -390,24 +392,24 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     text(rl - (rr-rl)*1, seq(min(rb), max(rt), len = 5)[2:4],
          sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2))[2:4],
          cex = cex.text, col = col.text)
-    
+
   }
-  
+
   if (legend_type == 0) {
     par(xpd = NA)
-    
+
     prettymapr::addnortharrow(pos = "bottomright", scale = 0.5, padin_arr)
-    prettymapr::addscalebar(pos = "bottomright", padin = padin_bar, 
+    prettymapr::addscalebar(pos = "bottomright", padin = padin_bar,
                             labelpadin = 0.02, widthhint = widthhint)
-    
-    cols = colorRampPalette(c(bg, 
+
+    cols = colorRampPalette(c(bg,
                               "light yellow", "yellow",
                               "red", "maroon"))(ncols)
-    
+
     plot.new()
     usr = par("usr")
     xl = usr[1]; xr = usr[2]; yb = usr[3]; yt = usr[4]
-    
+
     h = yt - yb; w = xr - xl
     rl = xl + 0.2*w; rr = xl + 0.4*w
     rb = head(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
@@ -418,9 +420,9 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     text(rr - (rl-rr)*1, seq(min(rb), max(rt), len = 5)[2:4],
          sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2))[2:4],
          cex = cex.text, col = col.text, srt = 90)
-    
+
   }
-  
+
   if (no > 1) {
     for (o in 1:no) {
       par(xpd = F)
@@ -430,7 +432,7 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
       box()
     }
   }
-  
+
   par(old.par)
 }
 
@@ -448,17 +450,17 @@ if (FALSE) {
   targetfprob = 0.75  # maximum harvest rate of a given area
   selweight_cfl = N_cfl = with(data_om, array(0, dim = c(nc, nf, nl)))
   for (c in 1:data_om$nc) {
-    selweight_cfl[c,,] = matrix(selectivityF_cl[c,] * weight_cl[c,], 
+    selweight_cfl[c,,] = matrix(selectivityF_cl[c,] * weight_cl[c,],
                                 nrow = data_om$nf, ncol = data_om$nl, byrow = TRUE)
   }
   system.time({
     for (c in 1:data_om$nc) {
       N_cfl[c,,] = as.matrix(exp(data_om$A_fs %*% log(data_om$N_csl[c,,] / areaS + 1e-06)))
-    }  
+    }
     B_cf = apply(N_cfl * selweight_cfl, 1:2, "sum")
     p_cf = B_cf/rowSums(B_cf)
-    
-    
+
+
     for (c in 1:data_om$nc) {
       fprob_f = ifelse(p_cf[c,] < mean(p_cf[c,]), 1 - targetfprob, targetfprob)
       C_n = 0
@@ -466,12 +468,12 @@ if (FALSE) {
       while (sum(C_n) < limit_c[c]) {
         if (c == 1) {
           # all f sites available
-          C_n = sample(B_cf[c,], size = n, 
+          C_n = sample(B_cf[c,], size = n,
                        replace = F, prob = fprob_f)
         } else {
           # remove previously sampled sites f_i
           unfished = -unique(f_i)
-          C_n = sample(B_cf[c, unfished], size = n, 
+          C_n = sample(B_cf[c, unfished], size = n,
                        replace = F, prob = fprob_f[unfished])
         }
         n = n * 1.2
@@ -482,7 +484,7 @@ if (FALSE) {
       f_i = c(f_i, match(C_i, B_cf[c,]))
       C_ci = B_cf[,f_i]
       c_i = c(c_i, rep(c, ni))
-      catch_i = c(catch_i, C_i) 
+      catch_i = c(catch_i, C_i)
       # throw back catch > limit
       for (cstar in (1:data_om$nc)[-c]) {
         if (cstar > c) {
@@ -491,7 +493,7 @@ if (FALSE) {
           # book-keeping
           f_i = c(f_i, match(C_i, B_cf[cstar,]))
           c_i = c(c_i, rep(cstar, nretain))
-          catch_i = c(catch_i, C_i)  
+          catch_i = c(catch_i, C_i)
         }
       }
     }

@@ -37,6 +37,8 @@
 #' @param psi_p probability of recruitment given the annaul period/season
 #' @param psi_l size distribution of new recruits
 #' @param psi_cs probability of an individual recruiting conditional on the environmental conditions at locations \code{loc_s}
+#' @param psi_csb spatial temporal scaling on (0,1) of environmental effect psi_cs for initialization period
+#' @param psi_cst spatial temporal scaling on (0,1) of environmental effect psi_cs
 #' @param mugE expected value of epsilon
 #' @param taugE SPDE scale parameter of epsilon
 #' @param kappaE SPDE range parameter of epsilon
@@ -106,6 +108,8 @@ setup_om = function(
   psi_p,
   psi_l, 
   psi_cs,
+	psi_csb = array(1, c(nc,ns,nb)),
+	psi_cst = array(1, c(nc,ns,nt)),
   mugE = 0,
   taugE,
   kappaE,
@@ -370,6 +374,8 @@ setup_om = function(
       psi_p = psi_p,
       psi_l = psi_l,
       psi_cs = psi_cs,
+			psi_csb = psi_csb,
+			psi_cst = psi_cst,
       E_csb = array(0, dim = c(nc, ns, nb)),
       gE_cst = array(0, dim = c(nc, ns, nt)),
       mugE = mugE,

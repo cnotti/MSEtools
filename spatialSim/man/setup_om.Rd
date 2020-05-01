@@ -42,6 +42,8 @@ setup_om(
   psi_p,
   psi_l,
   psi_cs,
+  psi_csb = array(1, c(nc, ns, nb)),
+  psi_cst = array(1, c(nc, ns, nt)),
   mugE = 0,
   taugE,
   kappaE,
@@ -131,6 +133,10 @@ setup_om(
 \item{psi_l}{size distribution of new recruits}
 
 \item{psi_cs}{probability of an individual recruiting conditional on the environmental conditions at locations \code{loc_s}}
+
+\item{psi_csb}{spatial temporal scaling on (0,1) of environmental effect psi_cs for initialization period}
+
+\item{psi_cst}{spatial temporal scaling on (0,1) of environmental effect psi_cs}
 
 \item{mugE}{expected value of epsilon}
 
