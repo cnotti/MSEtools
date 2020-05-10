@@ -346,7 +346,8 @@ Type objective_function<Type>::operator() () {
     selectivityF_c_l(c) = selectivityF_cl.row(c).transpose();
     selectivityF_c_1l(c) = selectivityF_cl.row(c);
     scale_cl.row(c) = selectivityF_c_1l(c) / areas * areadredge;
-    maxpsis_c(c) = psi_cs.row(c).maxCoeff();
+    //maxpsis_c(c) = psi_cs.row(c).maxCoeff();
+		maxpsis_c(c) = psi_csb.matrix().row(c).mean();
   }
   
   // random generator for zero cathes
@@ -385,7 +386,7 @@ Type objective_function<Type>::operator() () {
             N_csb_l(c,s,b) = G_c_ll(c) * ((N_csb_l(c,s,b-1) + R_l).cwiseProduct(S_l));
             // SSB estimates
             SSB_cb_s(c,b)(s) = (weight_c_1l(c) * (N_csb_l(c,s,b).cwiseProduct(pmat_c_l(c))))(0,0);
-            if (b > nb/3 & psi_cs(c,s) == maxpsis_c(c)) {
+            if (b > nb/3 & psi_cs(c,s) >= maxpsis_c(c)) {
               SSB0_c(c) += SSB_cb_s(c,b)(s); // sum over all locations with optimal recruitment conditions
               n0_c(c) += 1;
             }
