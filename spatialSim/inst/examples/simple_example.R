@@ -43,7 +43,9 @@ for (j in 1:1) {
     nf = nrow(loc_f)
     areadredge = areaOmega/nf
 
-    # calculate psi_cs from bathymetry
+    # specify xi
+    xi_p = c(rep(0, np/2), rep(1/(np/2), np/2))
+
     depths = -c(1:7)
     nbounds = length(depths)
     dbounds = c(xx[1], xx[1] + cumsum(rep((xx[2] - xx[1])/nbounds, nbounds)))
@@ -56,17 +58,18 @@ for (j in 1:1) {
 
     lnmud_c = c(1.317284, 1.468462)
     sigmad_c = c(0.3074893, 0.2669919)
-    psi_cs = matrix(0, nc, ns)
+    xi_cs = matrix(0, nc, ns)
     for (c in 1:nc) {
-      psi_cs[c,] = plnorm(-depth_s, lnmud_c[c], sigmad_c[c]) -
+      xi_cs[c,] = plnorm(-depth_s, lnmud_c[c], sigmad_c[c]) -
         plnorm(-depth_s-1, lnmud_c[c], sigmad_c[c])
     }
 
-    # define high density 'beds' using psi_cst
+    # define high density 'beds' using xi_cst
+
     nbed_c = c(5, 3) # number of beds
     ny_cylcle = 4 # length of years to complete movement cycle
-    psi_cst = array(1, c(nc,ns,nt), list("species" = NULL, "location" = NULL, "time" = NULL))
-    psi_csb = array(1, c(nc,ns,nb))
+    xi_cst = array(1, c(nc,ns,nt), list("species" = NULL, "location" = NULL, "time" = NULL))
+    xi_csb = array(1, c(nc,ns,nb))
     Y_j = seq(yy[1], yy[2], len=10000)
     gY_j = (Y_j - min(Y_j))/max(Y_j - min(Y_j))
     j_s = FNN::get.knnx(Y_j, loc_s[,2])$nn.index[,1]
@@ -74,8 +77,8 @@ for (j in 1:1) {
       sc_i = (c-1)*24
       t = 1
       for (p in rep(1:12, max(ny, nb/12))) {
-        if (t <= nb) psi_csb[c,,t] = pmax(cos(gY_j[j_s] * nbed_c[c] * 2 * pi + sc_i*pi/ny_cylcle), 0)
-        if (t <= nt) psi_cst[c,,t] = pmax(cos(gY_j[j_s] * nbed_c[c] * 2 * pi + sc_i*pi/ny_cylcle), 0)
+        if (t <= nb) xi_csb[c,,t] = pmax(cos(gY_j[j_s] * nbed_c[c] * 2 * pi + sc_i*pi/ny_cylcle), 0) * xi_cs[c,] * xi_p[p]
+        if (t <= nt) xi_cst[c,,t] = pmax(cos(gY_j[j_s] * nbed_c[c] * 2 * pi + sc_i*pi/ny_cylcle), 0) * xi_cs[c,] * xi_p[p]
         t = t + 1
         sc_i = sc_i + 1
       }
@@ -194,11 +197,9 @@ for (j in 1:1) {
       fn_mature = fn_mature,
       R0_c = exp(c(6, 4)),
       h_c = c(0.9, 0.9),
-      psi_p = c(rep(0, np/2), rep(1/(np/2), np/2)),
-      psi_l = matrix(c(1, rep(0, nl - 1)), ncol = 1),
-      psi_cs = psi_cs,
-      psi_csb = psi_csb,
-      psi_cst = psi_cst,
+      upsilon_l = matrix(c(1, rep(0, nl - 1)), ncol = 1),
+      xi_csb = xi_csb,
+      xi_cst = xi_cst,
       mugE = -5,
       taugE = 0.00025, #0.00025
       kappaE = exp(4.5),

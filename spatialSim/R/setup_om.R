@@ -34,11 +34,9 @@
 #' @param fn_mature function specifying sexual maturity
 #' @param R0_c scale term of stock recruit function for each species
 #' @param h_c stock-recruit steepness parameters for each species
-#' @param psi_p probability of recruitment given the annaul period/season
-#' @param psi_l size distribution of new recruits
-#' @param psi_cs probability of an individual recruiting conditional on the environmental conditions at locations \code{loc_s}
-#' @param psi_csb spatial temporal scaling on (0,1) of environmental effect psi_cs for initialization period
-#' @param psi_cst spatial temporal scaling on (0,1) of environmental effect psi_cs
+#' @param upsilon_l size distribution of new recruits
+#' @param xi_csb probability of an individual recruiting conditional on the environmental conditions at locations \code{loc_s} at initialization time period \code{b}
+#' @param xi_cst probability of an individual recruiting conditional on the environmental conditions at locations \code{loc_s} at time period \code{t}
 #' @param mugE expected value of epsilon
 #' @param taugE SPDE scale parameter of epsilon
 #' @param kappaE SPDE range parameter of epsilon
@@ -105,11 +103,9 @@ setup_om = function(
   fn_mature,
   R0_c,
   h_c,
-  psi_p,
-  psi_l, 
-  psi_cs,
-	psi_csb = array(1, c(nc,ns,nb)),
-	psi_cst = array(1, c(nc,ns,nt)),
+  upsilon_l, 
+	xi_csb = array(1, c(nc,ns,nb)),
+	xi_cst = array(1, c(nc,ns,nt)),
   mugE = 0,
   taugE,
   kappaE,
@@ -237,7 +233,7 @@ setup_om = function(
     
     # recruitment
     npsi = 1
-    psi_l = matrix(c(rep(1/npsi, npsi), rep(0, nl - npsi)), ncol = 1)
+    upsilon_l = matrix(c(rep(1/npsi, npsi), rep(0, nl - npsi)), ncol = 1)
     if (missing(Rho_cc)) {
       Rho_cc = diag(nc)
     }
@@ -371,11 +367,9 @@ setup_om = function(
       R0_c = R0_c,
       h_c = h_c,
       pmat_cl = pmat_cl,
-      psi_p = psi_p,
-      psi_l = psi_l,
-      psi_cs = psi_cs,
-			psi_csb = psi_csb,
-			psi_cst = psi_cst,
+      upsilon_l = upsilon_l,
+			xi_csb = xi_csb,
+			xi_cst = xi_cst,
       E_csb = array(0, dim = c(nc, ns, nb)),
       gE_cst = array(0, dim = c(nc, ns, nt)),
       mugE = mugE,

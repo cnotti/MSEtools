@@ -172,9 +172,8 @@ void calc_recruit(matrix<double>& R_cst_l,
                   vector<int> s_cs_sstar,                  
                   double h, 
                   double E_cst, 
-                  matrix<double> psi_l, 
-                  double psi_p,
-                  double psi_d,
+                  matrix<double> upsilon_l, 
+                  double xi_cst,
                   double Rthreshold,
                   int optionRrange) {
   int nsstar = s_cs_sstar.size();
@@ -197,7 +196,7 @@ void calc_recruit(matrix<double>& R_cst_l,
   if (pSSB < Rthreshold) {
     R_cst_l = psi_l * 0;
   } else {
-    R_cst_l = R0 * pSSB / (1 - ((5 * h - 1)/(4 * h))*(1 - pSSB)) * E_cst * psi_p*psi_d*psi_l;
+    R_cst_l = R0 * pSSB / (1 - ((5 * h - 1)/(4 * h))*(1 - pSSB)) * E_cst * xi_cst * upsilon_l;
   }
 }
 
