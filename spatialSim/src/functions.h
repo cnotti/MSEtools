@@ -194,7 +194,7 @@ void calc_recruit(matrix<double>& R_cst_l,
   
   double pSSB = SSBavail / SSB0_c;
   if (pSSB < Rthreshold) {
-    R_cst_l = psi_l * 0;
+    R_cst_l = upsilon_l * 0;
   } else {
     R_cst_l = R0 * pSSB / (1 - ((5 * h - 1)/(4 * h))*(1 - pSSB)) * E_cst * xi_cst * upsilon_l;
   }

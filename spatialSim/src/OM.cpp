@@ -219,8 +219,8 @@ Type objective_function<Type>::operator() () {
   DATA_DVECTOR(Rthreshold_c);
   DATA_DMATRIX(pmat_cl);
   DATA_DMATRIX(upsilon_l);
-	DATA_DARRAY(xi_csb);                // scale psi_cs on (0,1)
-	DATA_DARRAY(xi_cst);                // scale psi_cs on (0,1)
+	DATA_DARRAY(xi_csb);               
+	DATA_DARRAY(xi_cst);               
   DATA_DARRAY(E_csb);                // burn-in recruitment innovations
   DATA_DARRAY(E_cst);                // RF on recruitment
   DATA_INTEGER(optionRrange);        // use mean or median SSB in Rrange to calc recruit
