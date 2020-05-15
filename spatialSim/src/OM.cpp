@@ -203,7 +203,7 @@ Type objective_function<Type>::operator() () {
   // fishing mortality
   DATA_DMATRIX(selectivityF_cl);
   DATA_DVECTOR(limit_c);
-  DATA_DSCALAR(areaOmegastar);       // area of spatial domain Omegastar
+  DATA_DSCALAR(areaOmega);       // area of spatial domain Omegastar
   DATA_DSCALAR(areadredge);          // area-swept by dredge 
   DATA_SPARSE_DMATRIX(A_fs);         // projection matrix s -> f 
   DATA_DARRAY(ncatch_cstl);
@@ -305,7 +305,7 @@ Type objective_function<Type>::operator() () {
   vector< matrix<double> > selectivityF_c_1l(nc);     // fishing selectivity
   
   // area of each node
-  double areas = areaOmegastar / ns;
+  double areas = areaOmega / ns;
   
   // variables used in harvest
   matrix<double> Ad_fs = matrix<double>(A_fs);        // dense proj matrix

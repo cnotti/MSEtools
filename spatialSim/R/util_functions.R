@@ -171,6 +171,10 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
   cols = colorRampPalette(c(bg,
                             "light yellow", "yellow",
                             "red", "maroon"))(ncols)
+  cols = colorRampPalette(c("darkblue", "blue", "white",
+                            "light yellow", "yellow", "yellow", "red",
+                            "red", "maroon"))(ncols)
+  (ncols)
 
   lon = inla_proj$x
   lat = inla_proj$y
@@ -192,12 +196,12 @@ plot_map = function(z_s, inla_proj, land, bath, legend_type = 1,
          xlim = xlim, ylim = ylim, xpd = FALSE)
     image(lon, lat, zmat,
           col =  cols, breaks = seq(leglim[1], leglim[2], len = ncols + 1),
-          add = TRUE)
+          add = TRUE, useRaster = TRUE)
     plot(land, col = "dark green", add = TRUE, xpd = FALSE)
   } else {
     image(lon, lat, zmat, xaxt = "n", yaxt = "n",
           col =  cols, breaks = seq(leglim[1], leglim[2], len = ncols + 1),
-          asp = 1, xlim = xlim, ylim = ylim)
+          asp = 1, xlim = xlim, ylim = ylim, useRaster = TRUE)
     #plot(domain, add = TRUE, bg = bg)
   }
   if (!missing(bath)) {
@@ -288,7 +292,7 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                        p, y, leglim_c = NULL, cex.text = 1,
                        xlim, ylim, col.text = "black", no = 1,
                        lab_om = 1:no, np = 12, ncols = 100, pretty = TRUE,
-                       species_names = NULL, height = 5,
+                       species_names = NULL, height = 5, ticks = TRUE,
                        p_width = 0.3, mar = rep(0.2, 4),
                        legend_type = 1, legend_size = 0.4,
                        bg = "dark blue", widthhint = 0.55,
@@ -377,6 +381,9 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     cols = colorRampPalette(c(bg,
                               "light yellow", "yellow",
                               "red", "maroon"))(ncols)
+    cols = colorRampPalette(c("darkblue", "blue", "white",
+                              "light yellow", "yellow", "yellow", "red",
+                              "red", "maroon"))(ncols)
 
     plot.new()
     usr = par("usr")
@@ -387,10 +394,18 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     rb = head(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
     rt = tail(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
     rect(rl, rb, rr, rt, col = cols, border = NA)
-    rect(rl, head(seq(min(rb), max(rt), len = 5), -2), rr,
-         tail(seq(min(rb), max(rt), len = 5), -2))
-    text(rl - (rr-rl)*1, seq(min(rb), max(rt), len = 5)[2:4],
-         sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2))[2:4],
+    if (ticks == FALSE) {
+      rect(rl, head(seq(min(rb), max(rt), len = 5), -2), rr,
+           tail(seq(min(rb), max(rt), len = 5), -2))
+    } else {
+      rect(rl, rb[1], rr, tail(rt, 1), lwd = 0.5)
+      for (i in 2:4) {
+        lines(c(rl, rl*1.05), rep(seq(min(rb), max(rt), len = 5)[i], 2))
+        lines(c(rr, rr*.95), rep(seq(min(rb), max(rt), len = 5)[i], 2))
+      }
+    }
+    text(rl - (rr-rl)*1, seq(min(rb), max(rt), len = 5),
+         sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2)),
          cex = cex.text, col = col.text)
 
   }
@@ -406,6 +421,9 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
                               "light yellow", "yellow",
                               "red", "maroon"))(ncols)
 
+    cols = colorRampPalette(c("darkblue", "blue", "white",
+                              "light yellow", "yellow", "yellow", "red",
+                              "red", "maroon"))(ncols)
     plot.new()
     usr = par("usr")
     xl = usr[1]; xr = usr[2]; yb = usr[3]; yt = usr[4]
@@ -415,10 +433,19 @@ plot_map_cy = function(z_csy, inla_proj, land, bath, lab_y,
     rb = head(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
     rt = tail(seq(yb + legend_size*h, yt - legend_size*h, len = ncols), -1)
     rect(rl, rb, rr, rt, col = cols, border = NA)
-    rect(rl, head(seq(min(rb), max(rt), len = 5), -2), rr,
-         tail(seq(min(rb), max(rt), len = 5), -2))
-    text(rr - (rl-rr)*1, seq(min(rb), max(rt), len = 5)[2:4],
-         sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2))[2:4],
+    if (ticks == FALSE) {
+      rect(rl, head(seq(min(rb), max(rt), len = 5), -2), rr,
+           tail(seq(min(rb), max(rt), len = 5), -2))
+    } else {
+      rect(rl, rb[1], rr, tail(rt, 1), lwd = 0.5)
+      for (i in 2:4) {
+        lines(c(rl, rl*1.05), rep(seq(min(rb), max(rt), len = 5)[i], 2))
+        lines(c(rr, rr*.95), rep(seq(min(rb), max(rt), len = 5)[i], 2))
+      }
+    }
+
+    text(rr - (rl-rr)*1, seq(min(rb), max(rt), len = 5),
+         sprintf("%.2f", round(seq(leglim_c[1,1], leglim_c[1,2], len = 5), 2)),
          cex = cex.text, col = col.text, srt = 90)
 
   }

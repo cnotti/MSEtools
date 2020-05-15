@@ -121,7 +121,8 @@ setup_om = function(
   mesh,
   lnaniso = rep(0, 2),
   projection = "utm",
-  
+  areaOmega,
+	
   # population size structure
   lmin_c = rep(0, nc), 
   lmax_c,
@@ -352,7 +353,7 @@ setup_om = function(
       selectivityF_cl = selectivityF_cl,
       ncatch_cstl = array(0, dim = c(nc, ns, nt, nl)),
       limit_c = limit_c,
-      areaOmegastar = areaOmegastar, 
+      areaOmega = areaOmega, 
       areadredge = areadredge,
       ptarget = ptarget,
       F_intensity = F_intensity,
