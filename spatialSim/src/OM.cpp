@@ -290,8 +290,9 @@ Type objective_function<Type>::operator() () {
   
   // biomass
   array<double> B_ct(nc,nt); B_ct.setZero();
-  array<double> B_cst(nc,ns,nt); B_cst.setZero();
-  matrix< matrix<double> > B_ct_s(nc,nt);
+  array<double> B_cst(nc,ns,nt); B_cst.setZero();				// Biomass per node post harvest
+  array<double> Bm2_cst(nc,ns,nt); Bm2_cst.setZero();   // Biomass per unit area square prior to harvest
+	matrix< matrix<double> > B_ct_s(nc,nt);
   matrix< matrix<double> > SSB_cb_s(nc,nb);
   matrix< matrix<double> > SSB_ct_s(nc,nt);
   array<double> SSB_ct(nc,nt); SSB_ct.setZero();      // ssb summed over space
@@ -459,8 +460,9 @@ Type objective_function<Type>::operator() () {
           N_cst_l(c,s,t) = G_c_ll(c) * (N_cst_l(c,s,t-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
           // N_csta_l(c,s,t,a) = G_c_ll(c) * (N_csta_l(c,s,t-1,a-1) + R_cst_l(c,s,t-1)).cwiseProduct(S_l);
         }
-        B_ct_s(c,t)(s) = (weight_c_1l(c) * N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c)))(0,0) / areas * areadredge;
-        // reshape and scale N for projection
+				Bm2_cst(c,s,t) = (weight_c_1l(c) * N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c)))(0,0) / areas;
+        // reshape and scale N and B for projection
+				B_ct_s(c,t)(s) = Bm2_cst(c,s,t) * areadredge;
         N_ct_sl(c,t).row(s) = (N_cst_l(c,s,t).cwiseProduct(selectivityF_c_l(c))).transpose() / areas * areadredge;
         // iterate cs
         cs += 1;
@@ -494,12 +496,14 @@ Type objective_function<Type>::operator() () {
         N_fl = A_fs * N_ct_sl(c,t);
         B_f = A_fs * B_ct_s(c,t);
 
-        // calculate site selection probs
-        if (F_settings(0) == 0) {
-          muBf = ftarg.unaryExpr(B_f).mean();
-        } else {
-          muBf = median(ftarg.unaryExpr(B_f));
-        }
+        // calculate site selection probs (only done in first fishing period each season)
+				if (p_t(t) == fishp1) {
+					if (F_settings(0) == 0) {
+						muBf = ftarg.unaryExpr(B_f).mean();
+					} else {
+						muBf = median(ftarg.unaryExpr(B_f));
+					}
+				}        
         
         nsamps = std::min(ceil(limitp_c(c) / muBf), ceil(ntarg * 0.9));
         nsites = std::min(ceil(nsamps / F_intensity), ceil(ntarg));
@@ -620,6 +624,7 @@ Type objective_function<Type>::operator() () {
   REPORT(SSB0_c);
   REPORT(N_csl);
   REPORT(B_cst);
+	REPORT(Bm2_cst);
   REPORT(ncatch_cstl);
   REPORT(c_i);
   REPORT(f_i);
