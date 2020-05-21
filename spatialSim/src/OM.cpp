@@ -201,6 +201,7 @@ Type objective_function<Type>::operator() () {
   DATA_DARRAY(M_cstl);
   
   // fishing mortality
+	DATA_INTEGER(fishp1);
   DATA_DMATRIX(selectivityF_cl);
   DATA_DVECTOR(limit_c);
   DATA_DSCALAR(areaOmega);       // area of spatial domain Omegastar
