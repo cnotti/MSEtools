@@ -473,7 +473,7 @@ if (FALSE) {
   limit_c = data_om$limit_c
   selectivityF_cl = t(do.call("cbind", om_rep$selectivityF_c_l))
   weight_cl = data_om$weight_cl
-  areaS = data_om$areaOmegastar/data_om$ns
+  areaS = data_om$areaOmega/data_om$ns
   targetfprob = 0.75  # maximum harvest rate of a given area
   selweight_cfl = N_cfl = with(data_om, array(0, dim = c(nc, nf, nl)))
   for (c in 1:data_om$nc) {

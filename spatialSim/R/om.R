@@ -104,7 +104,7 @@ print.om <- function(x, units = "kg", ...) {
     )
   
   Brange.d = apply(
-    with(x$data_om, x$om_rep[["B_cst"]]/(areaOmegastar/ns)), 1, "range"
+    with(x$data_om, x$om_rep[["B_cst"]]/(areaOmega/ns)), 1, "range"
   )
   
   cat("==================== OM summary ====================\n")
@@ -124,4 +124,28 @@ print.om <- function(x, units = "kg", ...) {
   cat(x$harvest_time)
   cat("====================================================\n")
 }
+
+
+
+#' Coerce \code{\link{om}} output to data.frame 
+#'
+#' @title Coerce \code{\link{om}} output to data.frame
+#' @param x Output from \code{\link{om}}
+#' @param ... Not used
+#' @return \code{\link{data.frame}}
+#' @method as.data.frame \code{\link{om}}
+#' @export
+as.data.frame.om <- function(x, ...) {
+  data_om = x$data_om
+	om_rep = x$om_rep
+	lab_species = data_om$extra$species_names
+	
+}
+
+
+
+
+
+
+
 
