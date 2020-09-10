@@ -209,6 +209,7 @@ Type objective_function<Type>::operator() () {
   DATA_SPARSE_DMATRIX(A_fs);         // projection matrix s -> f 
   DATA_DARRAY(ncatch_cstl);
   DATA_DSCALAR(ptarget);             // site sampling probability given B_i > x 
+	DATA_DVECTOR(ploc_f);
   DATA_DSCALAR(F_intensity);         // proportion of an area that will be fished at time t
   DATA_IVECTOR(F_settings);          // set whether muF is defined by mean or median 
   DATA_DSCALAR(probZero);
@@ -530,13 +531,18 @@ Type objective_function<Type>::operator() () {
         
         prob_f.resize(nsites);
         for (int f=0; f < nsites; f++) {
+					// prob of site selection
           if (B_f(f_sample(f)) > muBf) {
             prob_f(f) = ptarget;
           } else {
             prob_f(f) = 1 - ptarget;
           }
         }
-        
+				if (ploc_f(0) != -1) {
+					// add fixed site selection probability conditional on locations position in domain
+					prob_f = prob_f.cwiseProduct(f_sample.unaryExpr(ploc_f));
+				}
+				
         while (catch_n.sum() < limitp_c(c) & nsamps <= nsites) {
           // resize containers
           f_n.resize(nsamps);
