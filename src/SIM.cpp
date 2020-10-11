@@ -92,9 +92,10 @@ Type objective_function<Type>::operator() () {
     array<Type> H_sbl(ns,nb,nl);
     array<Type> H_stl(ns,nt,nl);
     Type Hmean = 0;
-    
+		
     array<Type> M_csbl(nc,ns,nb,nl);
     array<Type> M_cstl(nc,ns,nt,nl);
+		Type Mmean = 0;
     
     SEPARABLE(AR1(phiEt),
               SEPARABLE(GMRF(QE), MVN_c)).simulate(gE_csn);
@@ -116,6 +117,7 @@ Type objective_function<Type>::operator() () {
               for (int l=0; l<nl; l++) {
                 H_sbl(s,t,l) = exp(gH_snl(splus_s(s),t,l) / taugH + mugH);
                 Hmean += H_sbl(s,t,l);
+								Mmean += H_sbl(s,t,l) * I_b(t);
               }
             }
             E_csb(c,s,t) = invlogit(gE_csn(c,splus_s(s),t) / taugE + mugE);
@@ -129,11 +131,13 @@ Type objective_function<Type>::operator() () {
               for (int l=0; l<nl; l++) {
                 H_stl(s,t-nb,l) = exp(gH_snl(splus_s(s),t,l) / taugH + mugH);
                 Hmean += H_stl(s,t-nb,l);
+								Mmean += H_stl(s,t,l) * I_t(t);
               }
             }
             E_cst(c,s,t-nb) = invlogit(gE_csn(c,splus_s(s),t) / taugE + mugE);
             Emean += E_cst(c,s,t-nb);
           }
+					
         }
       }
     }
@@ -141,15 +145,16 @@ Type objective_function<Type>::operator() () {
     Emean /= (nc*ns*(nb+nt));
     Imean /= (nb+nt);
     Hmean /= (ns*(nb+nt)*nl);
+		Mmean /= (ns*(nb+nt)*nl);
     
     for (int c=0; c<nc; c++) {
       for (int s=0; s<ns; s++) {  
         for (int l=0; l<nl; l++) {
           for (int b=0; b<nb; b++) {        
-            M_csbl(c,s,b,l) = alpha_c(c)/np * I_b(b)*H_sbl(s,b,l)/(Imean*Hmean);
+            M_csbl(c,s,b,l) = alpha_c(c)/np * I_b(b)*H_sbl(s,b,l)/Mmean; //(Imean*Hmean);
           }
           for (int t=0; t<nt; t++) {
-            M_cstl(c,s,t,l) = alpha_c(c)/np * I_t(t)*H_stl(s,t,l)/(Imean*Hmean);
+            M_cstl(c,s,t,l) = alpha_c(c)/np * I_t(t)*H_stl(s,t,l)/Mmean; //(Imean*Hmean);
           }
         }
       }
