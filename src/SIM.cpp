@@ -131,7 +131,7 @@ Type objective_function<Type>::operator() () {
               for (int l=0; l<nl; l++) {
                 H_stl(s,t-nb,l) = exp(gH_snl(splus_s(s),t,l) / taugH + mugH);
                 Hmean += H_stl(s,t-nb,l);
-								Mmean += H_stl(s,t,l) * I_t(t);
+								Mmean += H_stl(s,t-nb,l) * I_t(t-nb);
               }
             }
             E_cst(c,s,t-nb) = invlogit(gE_csn(c,splus_s(s),t) / taugE + mugE);
